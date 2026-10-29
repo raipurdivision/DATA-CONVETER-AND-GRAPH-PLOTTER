@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DATA CONVERTER AND CHART PLOTTER</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root { --bar:#9b9b9b; --body:#bdbdbd; --ink:#4d4d4d; --btn:#666666; }
+  * { box-sizing: border-box; }
+  body { font-family: Calibri, "Segoe UI", Arial, sans-serif; margin: 0; padding: 14px; background: #e6e6e6; color: var(--ink); }
+  /* whole page = one registration-style form: grey title bar + grey body, white fields */
+  .wrap { max-width: 1300px; margin: 0 auto; background: #e6e6e6; }
+  h1 { font-family: Georgia, "Palatino Linotype", "Times New Roman", serif; text-align: center; background: var(--bar); color: #4e2a1a; margin: 0; border-bottom: 3px solid #6b6b6b; padding: 30px 20px 26px; font-weight: 700; font-size: 24px; letter-spacing: .3px; }
+  h1 .sub { font-size: 17px; font-weight: 700; letter-spacing: 2px; margin-top: 8px; color: #4e2a1a; }
+  .card { background: var(--body); padding: 0 0 22px; border: 0; }
+  h1 + .card { padding-top: 14px; }
+  .card > label:first-child { display: block; margin: 0 0 14px; padding: 12px 62px 6px; background: transparent; color: #0d2340; font-size: 15px; font-weight: 700; border: 0; border-bottom: 1px solid #aaa; margin-left: 24px; margin-right: 24px; padding-left: 38px; }
+  .card > *:not(label:first-child) { margin-left: 62px; margin-right: 62px; }
+  .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
+  label { font-size: 13px; font-weight: 700; display: block; margin-bottom: 5px; color: #0d2340; }
+  input[type=date], input[type=time], input[type=text], select { padding: 6px 8px; border: 0 !important; border-radius: 0; background: #fff !important; color: #333; font-size: 13px; height: 28px; }
+  input[type=file] { padding: 4px; border: 0; background: #fff; font-size: 13px; }
+  input:focus, select:focus { outline: 2px solid #8a8a8a; }
+  #tp { position: absolute; z-index: 50; background: #fff; border: 1px solid #888; box-shadow: 0 6px 18px rgba(0,0,0,.35); display: none; }
+  #tp .cols { display: flex; }
+  #tp .col { width: 54px; max-height: 190px; overflow-y: auto; border-right: 1px solid #ddd; }
+  #tp .col:last-child { border-right: 0; }
+  #tp .hd { position: sticky; top: 0; background: #6b6b6b; color: #fff; font-size: 11px; font-weight: 700; text-align: center; padding: 3px 0; }
+  #tp .it { text-align: center; padding: 4px 0; font-size: 13px; cursor: pointer; color: #222; }
+  #tp .it:hover { background: #e2e2e2; }
+  #tp .it.on { background: #1f4e79; color: #fff; font-weight: 700; }
+  #tp .ft { display: flex; justify-content: space-between; padding: 5px 6px; background: #eee; border-top: 1px solid #ccc; }
+  #tp .ft span { font-size: 12px; font-weight: 700; color: #1f4e79; cursor: pointer; padding: 2px 6px; }
+  input.t24 { width: 110px; text-align: center; }
+  button { background: var(--btn); color: #fff; border: 0; padding: 8px 20px; border-radius: 0; cursor: pointer; font-size: 14px; font-family: inherit; }
+  button:hover:not(:disabled) { background: #4a4a4a; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  #info { font-size: 13px; margin-top: 12px; padding: 7px 10px; background: #e4e4e4; color: #444; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { border: 1px solid #d9d9d9; padding: 4px 8px; text-align: center; }
+  th { background: var(--bar); color: #fff; font-weight: 400; }
+  tbody tr { background: #fff; } tbody tr:nth-child(even) { background: #f1f1f1; }
+  tbody tr:hover { background: #e2e2e2; }
+  .chartbox { position: relative; height: 400px; margin-top: 12px; background: #fff; padding: 6px; }
+  .hide { display: none; }
+  #anim { background: #1565c0; color: #fff; }
+  #anim:hover:not(:disabled) { background: #0d47a1; }
+  #animBox { margin-top: 10px; background: #fff; border-left: 6px solid #c62828; padding: 10px 14px; font-size: 14px; color: #333; }
+  #animBox .big { display: flex; flex-wrap: wrap; gap: 26px; align-items: baseline; margin-bottom: 8px; }
+  #animBox .big b { font-size: 20px; color: #c62828; }
+  #animBox .big span { font-size: 13px; color: #555; }
+  #animBox .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  #animBox .chip { border: 1px solid #ccc; padding: 4px 9px; font-size: 12.5px; background: #f6f6f6; color: #777; }
+  #animBox .chip.done { background: #fdecea; border-color: #c62828; color: #8e1b1b; }
+  #animBox .chip.next { background: #fff3cd; border-color: #e0a800; color: #6b4e00; font-weight: 700; }
+  .scroll { max-height: 520px; overflow: auto; background: #fff; }
+  .scroll th { position: sticky; top: 0; z-index: 1; }
+  input.info { padding: 6px 8px; }
+  .cust { display: flex; flex-direction: column; gap: 4px; width: 165px; }
+  .cust input { width: 100%; }
+  input.chd { font-weight: 700; color: #0d2340; background: #e4e4e4 !important; }
+  input.chd::placeholder { font-weight: 400; color: #777; }
+  #sumBox { margin-top: 14px; }
+  .sumHead { background: var(--bar); color: #4e2a1a; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-align: center; padding: 8px; border-bottom: 3px solid #6b6b6b; }
+  #sumTbl td { background: #fff; vertical-align: middle; }
+  #sumTbl td:first-child { font-weight: 700; color: #0d2340; }
+  #sumTbl textarea { width: 100%; border: 0; resize: vertical; font: 13px/1.4 inherit; font-family: inherit; padding: 4px; background: #fff; color: #222; outline: none; }
+  #sumTbl button.del { padding: 4px 10px; background: #8a5a52; }
+  input.lbl { width: 100%; height: auto; padding: 3px 6px; border: 1px solid #ddd !important; font-size: 13px; background: #fff !important; }
+  #maxbox { margin-top: 12px; padding: 10px 14px; background: #fff; border-left: 6px solid var(--bar); font-size: 14px; font-weight: 600; color: #444; }
+  input[type=checkbox] { accent-color: #666; width: 20px; height: 20px; vertical-align: middle; margin: 0 6px 0 0; cursor: pointer; }
+  .chk { color: #c62828; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex !important; align-items: center; margin-bottom: 0; padding: 6px 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>DATA CONVERTER AND CHART PLOTTER<div class="sub">Raipur Division</div></h1>
+
+  <div class="card">
+    <label>1. Select file type and upload file</label>
+    <div class="row">
+      <div><label for="ftype">Select file type</label>
+        <select id="ftype" style="padding:6px;border:1px solid #aaa;border-radius:4px;min-width:150px">
+          <option value="">-- Select --</option>
+          <option>LAXVEN</option><option>MEDHA MEMU</option><option>MEDHA 3PH</option><option>TELPRO</option><option>RTIS</option><option>MRT</option><option>VEL</option>
+        </select></div>
+      <div><label for="file">Upload file</label><input type="file" id="file" disabled></div>
+    </div>
+    <div id="info">No file loaded.</div>
+  </div>
+
+  <div class="card">
+    <label>2. Time filter (leave blank for all data)</label>
+    <div class="row">
+      <div><label for="fd">From Date</label><input type="date" id="fd"></div>
+      <div><label for="ft">From Time</label><input type="text" id="ft" class="t24" placeholder="HH:MM:SS" maxlength="8" inputmode="numeric" autocomplete="off"></div>
+      <div><label for="td">To Date</label><input type="date" id="td"></div>
+      <div><label for="tt">To Time</label><input type="text" id="tt" class="t24" placeholder="HH:MM:SS" maxlength="8" inputmode="numeric" autocomplete="off"></div>
+      <div><button id="apply" disabled>Apply Filter</button></div>
+      <div><button id="reset" class="sec" disabled>Reset</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>3. Journey details (shown in Excel and PDF above chart title)</label>
+    <div class="row" style="margin-bottom:14px">
+      <div><label for="tno">TRAIN NO</label><input type="text" id="tno" class="info" style="width:130px"></div>
+      <div><label for="lno">LOCO NO</label><input type="text" id="lno" class="info" style="width:130px"></div>
+      <div><label for="lpn">LP NAME/HQ</label><input type="text" id="lpn" class="info" style="width:210px"></div>
+      <div><label for="dtx">DATA</label><input type="text" id="dtx" class="info" style="width:150px"></div>
+      <div><label for="sec">SECTION</label><input type="text" id="sec" class="info" style="width:150px"></div>
+    </div>
+    <div class="row" style="margin-bottom:14px">
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 1"><input type="text" class="cvl" placeholder="Enter value"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 2"><input type="text" class="cvl" placeholder="Enter value"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 3"><input type="text" class="cvl" placeholder="Enter value"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 4"><input type="text" class="cvl" placeholder="Enter value"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 5"><input type="text" class="cvl" placeholder="Enter value"></div>
+    </div>
+    <div class="row">
+      <div><button id="dl" disabled>Download Excel</button></div>
+      <div><button id="pdf" disabled>Generate PDF</button></div>
+      <div><label class="chk"><input type="checkbox" id="plot"> <span id="plotLbl">Plot Time vs Speed</span></label></div>
+      <div><label class="chk"><input type="checkbox" id="sumChk"> Write Summary</label></div>
+      <div><label for="distIn" style="color:#c62828">ADD DISTANCE</label><input type="text" id="distIn" placeholder="D1-D2  (or D1-D2, D2-D3)" autocomplete="off" style="padding:6px;border:1px solid #aaa;border-radius:4px;width:230px"></div>
+      <div><label for="ctitle">Chart Title</label><input type="text" id="ctitle" placeholder="Enter chart title" style="padding:6px;border:1px solid #aaa;border-radius:4px;width:280px"></div>
+      <div><label for="animSpd">Speed</label><select id="animSpd" style="padding:6px;border:0;height:28px"><option value="0.25">0.25X</option><option value="0.5">0.5X</option><option value="1" selected>1X</option><option value="2">2X</option><option value="4">4X</option><option value="8">8X</option><option value="12">12X</option><option value="16">16X</option></select></div>
+      <div><label for="animDur">Animation time</label><select id="animDur" style="padding:6px;border:0;height:28px"><option value="10">10 sec</option><option value="20" selected>20 sec</option><option value="40">40 sec</option><option value="60">60 sec</option></select></div>
+      <div><button id="anim" type="button">&#9654; Show Animation</button></div>
+    </div>
+    <div id="sumBox" class="hide">
+      <div class="sumHead">SUMMARY OF SPM ANALYSIS</div>
+      <table id="sumTbl"><thead><tr><th style="width:60px">NO.</th><th>OBSERVATION</th><th style="width:56px"></th></tr></thead><tbody></tbody></table>
+      <div style="margin-top:8px"><button id="addRow" type="button">+ Add Row</button></div>
+    </div>
+    <div id="maxbox" class="hide"></div>
+    <div id="chartWrap" class="chartbox hide"><canvas id="chart"></canvas></div>
+    <div id="animBox" class="hide"></div>
+  </div>
+
+  <div class="card">
+    <label id="dataHead">Data</label>
+    <div class="scroll">
+    <table id="preview"><thead><tr><th style="width:90px">DATE</th><th style="width:80px">TIME</th><th style="width:60px">SPEED</th><th id="thCode" style="width:120px">LAST/CUR LOCATION CODE</th><th>LABEL (text typed here is marked on the graph)</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+</div>
+
+<script>
+let allRows = [];     // {ts, date, time, speed, code}
+let rows = [];        // filtered
+let chart = null;
+let fileName = "output";
+let mode = "csv";     // "csv" (RTIS) or "medha" (Medha TXT)
+const colName = () => mode === "medha" ? "DISTANCE (KM)" : "LAST/CUR LOCATION CODE";
+const colVal = r => mode === "medha" ? r.dist : r.code;
+function setMode(m) {
+  mode = m;
+  $("thCode").textContent = colName();
+  $("plotLbl").textContent = m === "medha" ? "Plot Time vs Speed" : "Plot Time vs Speed";
+}
+
+// Medha TXT: Date(dd/mm/yy) Time Speed(kmph) Dist(metres travelled in that second) ...
+// Distance column of the table = running total in km.
+function parseMedha(text) {
+  const out = [];
+  let cum = 0;
+  const re = /^(\d\d)\/(\d\d)\/(\d\d)\s+(\d\d):(\d\d):(\d\d)\s+(\d+)\s+(\d+)(?:\s|$)/;
+  const lines = text.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(re);
+    if (!m) continue;
+    const dt = new Date(2000 + +m[3], +m[2] - 1, +m[1], +m[4], +m[5], +m[6]);
+    cum += +m[8];
+    out.push({
+      ts: dt.getTime(),
+      date: m[1] + "/" + m[2] + "/" + (2000 + +m[3]),
+      time: m[4] + ":" + m[5] + ":" + m[6],
+      speed: +m[7],
+      dist: +(cum / 1000).toFixed(3),
+      m: +m[8],
+      code: "",
+      label: ""
+    });
+  }
+  return out;
+}
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, "0");
+
+// TELPRO XLSX: A = date (dd/mm/yyyy), B = time (hh:mm:ss), C = distance in metres per second, D = speed.
+// Header / summary rows are skipped. Distance column of the table = running total in km (same as Medha).
+function parseTelpro(buf) {
+  if (typeof XLSX === "undefined") throw new Error("Excel reader library could not be loaded (check internet connection).");
+  const wb = XLSX.read(buf, { type: "array", cellDates: true });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const a = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "" });
+  const out = [];
+  let cum = 0;
+  const num = v => { const n = typeof v === "number" ? v : parseFloat(String(v).trim()); return isNaN(n) ? null : n; };
+  for (const r of a) {
+    let y, mo, d, h, mi, sc;
+    const A = r[0], B = r[1];
+    if (A instanceof Date) { y = A.getFullYear(); mo = A.getMonth() + 1; d = A.getDate(); }
+    else if (typeof A === "number" && A > 20000) { const dd = new Date(Math.round((A - 25569) * 86400000)); y = dd.getUTCFullYear(); mo = dd.getUTCMonth() + 1; d = dd.getUTCDate(); }
+    else { const m = String(A).trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/); if (!m) continue; d = +m[1]; mo = +m[2]; y = +m[3]; if (y < 100) y += 2000; }
+    if (B instanceof Date) { h = B.getHours(); mi = B.getMinutes(); sc = B.getSeconds(); }
+    else if (typeof B === "number") { const t = Math.round((B % 1) * 86400); h = Math.floor(t / 3600); mi = Math.floor(t % 3600 / 60); sc = t % 60; }
+    else { const m = String(B).trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?/); if (!m) continue; h = +m[1]; mi = +m[2]; sc = +(m[3] || 0); }
+    const dm = num(r[2]), sp = num(r[3]);
+    if (dm === null || sp === null) continue;
+    const dt = new Date(y, mo - 1, d, h, mi, sc);
+    if (isNaN(dt)) continue;
+    cum += dm;
+    out.push({
+      ts: dt.getTime(),
+      date: pad(d) + "/" + pad(mo) + "/" + y,
+      time: pad(h) + ":" + pad(mi) + ":" + pad(sc),
+      speed: Math.round(sp),
+      dist: +(cum / 1000).toFixed(3),
+      m: dm,
+      code: "",
+      label: ""
+    });
+  }
+  return out;
+}
+
+// MRT (ESMON) CSV: A = date (dd/mm/yyyy), B = time (hh:mm:ss), C = cumulative distance (km), D = speed.
+// Header / summary lines are skipped. Distance column of the table = cumulative distance as in the file.
+function parseMRT(text) {
+  const out = [];
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/);
+  for (const ln of lines) {
+    const c = ln.split(",");
+    const m = (c[0] || "").trim().match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    const t = (c[1] || "").trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    if (!m || !t) continue;
+    const dist = parseFloat(c[2]), sp = parseFloat(c[3]);
+    if (isNaN(dist) || isNaN(sp)) continue;
+    let y = +m[3]; if (y < 100) y += 2000;
+    const dt = new Date(y, +m[2] - 1, +m[1], +t[1], +t[2], +(t[3] || 0));
+    if (isNaN(dt)) continue;
+    out.push({
+      ts: dt.getTime(),
+      date: pad(+m[1]) + "/" + pad(+m[2]) + "/" + y,
+      time: pad(+t[1]) + ":" + pad(+t[2]) + ":" + pad(+(t[3] || 0)),
+      speed: Math.round(sp),
+      dist: +dist.toFixed(3),
+      code: "",
+      label: ""
+    });
+  }
+  return out;
+}
+
+// Medha 3PH TXT: Date(dd/mm/yy) | Time | Speed(kmph) | Dist(metres travelled in that second) | ...
+// Columns may be separated by "|" and/or spaces. Distance column of the table = running total in km.
+function parseMedha3P(text) {
+  const out = [];
+  let cum = 0;
+  const re = /^\s*(\d\d)\/(\d\d)\/(\d\d|\d{4})\s*\|?\s*(\d\d):(\d\d):(\d\d)\s*\|?\s*(\d+)\s*\|?\s*(\d+)(?=\s|\||$)/;
+  for (const ln of text.split(/\r?\n/)) {
+    const m = ln.match(re);
+    if (!m) continue;
+    const y = m[3].length === 2 ? 2000 + +m[3] : +m[3];
+    const dt = new Date(y, +m[2] - 1, +m[1], +m[4], +m[5], +m[6]);
+    if (isNaN(dt)) continue;
+    cum += +m[8];
+    out.push({
+      ts: dt.getTime(),
+      date: m[1] + "/" + m[2] + "/" + y,
+      time: m[4] + ":" + m[5] + ":" + m[6],
+      speed: +m[7],
+      dist: +(cum / 1000).toFixed(3),
+      m: +m[8],
+      code: "",
+      label: ""
+    });
+  }
+  return out;
+}
+
+function parseCSV(text) {
+  const lines = text.replace(/^\uFEFF/, "").split(/\r?\n/).filter(l => l.trim() !== "");
+  const header = lines[0].split(",").map(h => h.trim().toLowerCase());
+  const iTime = header.findIndex(h => h.includes("logging"));
+  let iSpeed = header.indexOf("speed");
+  const iCode = header.findIndex(h => h.includes("stationcode") || h.includes("station"));
+  if (iTime < 0 || iSpeed < 0 || iCode < 0) throw new Error("Expected columns not found (Logging Time, Speed, stationCode).");
+  const out = [];
+  for (let i = 1; i < lines.length; i++) {
+    const c = lines[i].split(",");
+    const t = (c[iTime] || "").trim();
+    // CSV format: M/D/YYYY H:mm[:ss]
+    const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (!m) continue;
+    const [_, mo, d, y, h, mi, s] = m;
+    const dt = new Date(+y, +mo - 1, +d, +h, +mi, +(s || 0));
+    if (isNaN(dt)) continue;
+    const sp = Math.round(parseFloat(c[iSpeed]));
+    out.push({
+      ts: dt.getTime(),
+      minKey: dt.getTime() - (+(s || 0)) * 1000,
+      hasSec: s !== undefined,
+      date: pad(dt.getDate()) + "/" + pad(dt.getMonth() + 1) + "/" + dt.getFullYear(),
+      time: pad(dt.getHours()) + ":" + pad(dt.getMinutes()) + ":" + pad(dt.getSeconds()),
+      speed: isNaN(sp) ? 0 : sp,
+      code: (c[iCode] || "").trim(),
+      label: ""
+    });
+  }
+  // The source logs ~1 row per second but stores only hh:mm. If a minute has
+  // no seconds, rebuild them from row order: 1st row = :00, 2nd = :01, ...
+  // The first minute of the file is usually cut off at the start, so its rows
+  // are aligned to the end of the minute (e.g. 21 rows -> :39 to :59).
+  let i = 0, firstGroup = true;
+  while (i < out.length) {
+    let j = i;
+    while (j < out.length && out[j].hasSec === false && out[j].minKey === out[i].minKey) j++;
+    if (j === i) { i++; firstGroup = false; continue; }
+    const n = j - i;
+    const start = (firstGroup && n < 60) ? 60 - n : 0;
+    for (let k = i; k < j; k++) {
+      const sec = Math.min(start + (k - i), 59);
+      const dt = new Date(out[k].minKey + sec * 1000);
+      out[k].ts = dt.getTime();
+      out[k].time = pad(dt.getHours()) + ":" + pad(dt.getMinutes()) + ":" + pad(dt.getSeconds());
+    }
+    firstGroup = false;
+    i = j;
+  }
+  return out;
+}
+
+// 24-hour time boxes: auto-insert colons while typing (e.g. 221023 -> 22:10:23)
+document.querySelectorAll("input.t24").forEach(el => el.addEventListener("input", () => {
+  const d = el.value.replace(/\D/g, "").slice(0, 6);
+  el.value = d.length > 4 ? d.slice(0, 2) + ":" + d.slice(2, 4) + ":" + d.slice(4)
+           : d.length > 2 ? d.slice(0, 2) + ":" + d.slice(2) : d;
+}));
+
+// Time selector popup (24 h): pick hour / minute / second from lists
+(function () {
+  const tp = document.createElement("div");
+  tp.id = "tp";
+  tp.innerHTML = '<div class="cols"></div><div class="ft"><span data-a="clear">Clear</span><span data-a="now">Now</span><span data-a="ok">OK</span></div>';
+  document.body.appendChild(tp);
+  const cols = tp.querySelector(".cols");
+  const names = ["HH", "MM", "SS"], max = [24, 60, 60];
+  let cur = null, val = [0, 0, 0];
+  names.forEach((nm, c) => {
+    const col = document.createElement("div");
+    col.className = "col";
+    col.innerHTML = '<div class="hd">' + nm + "</div>";
+    for (let i = 0; i < max[c]; i++) {
+      const it = document.createElement("div");
+      it.className = "it"; it.dataset.c = c; it.dataset.v = i; it.textContent = pad(i);
+      col.appendChild(it);
+    }
+    cols.appendChild(col);
+  });
+  const paint = (scroll) => {
+    tp.querySelectorAll(".it").forEach(it => {
+      const on = +it.dataset.v === val[+it.dataset.c];
+      it.classList.toggle("on", on);
+      if (on && scroll) it.parentNode.scrollTop = it.offsetTop - 80;
+    });
+  };
+  const write = () => { cur.value = val.map(pad).join(":"); };
+  const open = el => {
+    cur = el;
+    const m = el.value.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+    val = m ? [+m[1], +m[2], +(m[3] || 0)] : [0, 0, 0];
+    const r = el.getBoundingClientRect();
+    tp.style.left = (r.left + window.scrollX) + "px";
+    tp.style.top = (r.bottom + window.scrollY + 2) + "px";
+    tp.style.display = "block";
+    paint(true);
+  };
+  tp.addEventListener("mousedown", e => e.preventDefault());
+  tp.addEventListener("click", e => {
+    const it = e.target.closest(".it"), a = e.target.dataset.a;
+    if (it) { val[+it.dataset.c] = +it.dataset.v; write(); paint(false); }
+    else if (a === "clear") { cur.value = ""; tp.style.display = "none"; }
+    else if (a === "now") { const d = new Date(); val = [d.getHours(), d.getMinutes(), d.getSeconds()]; write(); paint(true); }
+    else if (a === "ok") tp.style.display = "none";
+  });
+  document.querySelectorAll("input.t24").forEach(el => {
+    el.addEventListener("focus", () => open(el));
+    el.addEventListener("click", () => open(el));
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === "Escape" || e.key === "Tab") tp.style.display = "none"; });
+  });
+  document.addEventListener("mousedown", e => {
+    if (!tp.contains(e.target) && !e.target.classList.contains("t24")) tp.style.display = "none";
+  });
+})();
+
+function limit(dateId, timeId, defTime) {
+  const d = $(dateId).value;
+  if (!d) return null;
+  let t = $(timeId).value.trim();
+  if (!/^([01]?\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(t)) t = defTime;
+  const [y, mo, da] = d.split("-").map(Number);
+  const [h, mi, s] = t.split(":").map(Number);
+  return new Date(y, mo - 1, da, h, mi, s || 0).getTime();
+}
+
+function applyFilter() {
+  const from = limit("fd", "ft", "00:00:00");
+  const to = limit("td", "tt", "23:59:59");
+  rows = allRows.filter(r => (from === null || r.ts >= from) && (to === null || r.ts <= to));
+  render();
+}
+
+function rangeDist() {
+  if (mode !== "medha" || !rows.length) return "";
+  const km = rows.reduce((a, r) => a + r.m, 0) / 1000;
+  return `DISTANCE FROM ${rows[0].time} TO ${rows[rows.length - 1].time}: ${km.toFixed(3)} km`;
+}
+
+function maxInfo() {
+  if (!rows.length) return null;
+  let m = 0;
+  for (let i = 1; i < rows.length; i++) if (rows[i].speed > rows[m].speed) m = i;
+  return { i: m, row: rows[m] };
+}
+
+function render() {
+  $("info").textContent = `File: ${fileName} | Total rows: ${allRows.length} | After filter: ${rows.length}`;
+  $("dataHead").textContent = `Data (${rows.length} rows)`;
+  const tb = $("preview").querySelector("tbody");
+  tb.innerHTML = rows.map((r, i) =>
+    `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.speed}</td><td>${colVal(r)}</td><td><input class="lbl" data-i="${i}" value="${r.label.replace(/"/g, "&quot;")}"></td></tr>`).join("");
+  $("dl").disabled = rows.length === 0;
+  $("pdf").disabled = rows.length === 0;
+  const mx = maxInfo(), box = $("maxbox");
+  if (mx) {
+    const rd = rangeDist();
+    box.textContent = `\u25B2 MAX SPEED: ${mx.row.speed}  (at ${mx.row.time} on ${mx.row.date}, ${mode === "medha" ? "distance " + mx.row.dist + " km" : "code " + mx.row.code})` + (rd ? "\n" + rd : "");
+    box.style.whiteSpace = "pre-line";
+    box.classList.remove("hide");
+  } else box.classList.add("hide");
+  drawChart();
+}
+
+let lblTimer = null;
+$("preview").addEventListener("input", e => {
+  if (!e.target.classList.contains("lbl")) return;
+  rows[+e.target.dataset.i].label = e.target.value;
+  clearTimeout(lblTimer);
+  lblTimer = setTimeout(drawChart, 300);
+});
+
+const marksPlugin = {
+  id: "marks",
+  beforeLayout(c) {
+    c.$bi = bottomInfo(c.ctx, c.width);
+    c.options.layout.padding = { bottom: c.$bi.P };
+  },
+  beforeDatasetsDraw(c) {
+    const a = c.$anim; if (!a) return;
+    const x = c.scales.x.getPixelForValue(a.k), ar = c.chartArea;
+    c.ctx.save(); c.ctx.beginPath(); c.ctx.rect(ar.left - 1, 0, Math.max(0, x - ar.left + 1), c.height); c.ctx.clip();
+  },
+  afterDatasetsDraw(c) {
+    if (c.$anim) c.ctx.restore();
+    const A = c.$anim;
+    const ctx = c.ctx, xs = c.scales.x, ys = c.scales.y, area = c.chartArea;
+    const mx = maxInfo();
+    ctx.save();
+    const cr = chartRows();
+    // ---- column ranges of the chart line (so labels can avoid it) ----
+    const pts = c.getDatasetMeta(0).data;
+    const W = Math.ceil(c.width) + 2, lo = new Float32Array(W).fill(1e9), hi = new Float32Array(W).fill(-1e9);
+    const mark = (x, y) => { const ix = Math.round(x); if (ix < 0 || ix >= W) return; if (y < lo[ix]) lo[ix] = y; if (y > hi[ix]) hi[ix] = y; };
+    for (let k = 0; k < pts.length; k++) {
+      const p0 = pts[k]; mark(p0.x, p0.y);
+      if (k) {
+        const p1 = pts[k - 1], n = Math.abs(Math.round(p0.x) - Math.round(p1.x));
+        for (let t = 1; t < n; t++) mark(p1.x + (p0.x - p1.x) * t / n, p1.y + (p0.y - p1.y) * t / n);
+      }
+    }
+    const hitsLine = (x0, y0, x1, y1) => {
+      for (let ix = Math.floor(x0) - 1; ix <= Math.ceil(x1) + 1; ix++) {
+        if (ix < 0 || ix >= W) continue;
+        if (hi[ix] >= y0 - 2 && lo[ix] <= y1 + 2) return true;
+      }
+      return false;
+    };
+    const placed = [];
+    ctx.font = "bold 8.5px Arial";
+    cr.forEach((o, k) => {
+      const r = o.r;
+      if (!r.label || !r.label.trim()) return;
+      const pl = parseLbl(r.label);
+      if (pl.t === "range") return;
+      ctx.globalAlpha = (!A || k <= A.k) ? 1 : 0;
+      const x = xs.getPixelForValue(k), y = ys.getPixelForValue(r.speed);
+      const txt = pl.t === "point" ? "D" + pl.n : r.label.trim(), w = ctx.measureText(txt).width + 4, h = 11;
+      ctx.strokeStyle = "#c62828"; ctx.fillStyle = "#c62828"; ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(x, area.bottom); ctx.lineTo(x, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+      // choose a spot for the label that touches neither the line nor another label
+      let best = null;
+      search:
+      for (let d = 8; d <= 160; d += 8) {
+        for (const [sx, sy] of [[1, -1], [-1, -1], [1, 1], [-1, 1]]) {
+          const x0 = sx > 0 ? x + d : x - d - w, y0 = sy < 0 ? y - d - h : y + d;
+          if (x0 < area.left || x0 + w > area.right || y0 < area.top || y0 + h > area.bottom) continue;
+          if (hitsLine(x0, y0, x0 + w, y0 + h)) continue;
+          if (placed.some(q => x0 < q[2] && x0 + w > q[0] && y0 < q[3] && y0 + h > q[1])) continue;
+          best = [x0, y0, x0 + w, y0 + h]; break search;
+        }
+      }
+      if (!best) best = [Math.min(Math.max(x + 8, area.left), area.right - w), Math.max(y - 22, area.top), 0, 0], best[2] = best[0] + w, best[3] = best[1] + h;
+      placed.push(best);
+      // thin leader from point to label box
+      const cx = Math.min(Math.max(x, best[0]), best[2]), cy = Math.min(Math.max(y, best[1]), best[3]);
+      ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(cx, cy); ctx.stroke();
+      ctx.textAlign = "left"; ctx.textBaseline = "middle";
+      ctx.fillText(txt, best[0] + 2, best[1] + h / 2 + 0.5);
+      ctx.globalAlpha = 1;
+    });
+    ctx.globalAlpha = 1;
+    // ---- distance arrows (lanes) + legend below the time axis ----
+    const bi = c.$bi || { items: [], lanes: 0, legend: [], P: 0 };
+    const y0 = c.height - bi.P + 6;
+    bi.items.forEach(m => {
+      if (A && Math.max(m.k1, m.k2) > A.k) return;
+      const xa = xs.getPixelForValue(m.k1), xb = xs.getPixelForValue(m.k2), ay = y0 + m.lane * 26 + 6;
+      ctx.strokeStyle = "#c62828"; ctx.fillStyle = "#c62828"; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(xa, ay); ctx.lineTo(xb, ay);
+      ctx.moveTo(xa, ay - 5); ctx.lineTo(xa, ay + 5); ctx.moveTo(xb, ay - 5); ctx.lineTo(xb, ay + 5); ctx.stroke();
+      const hd = (x, dir) => { ctx.beginPath(); ctx.moveTo(x, ay); ctx.lineTo(x + dir * 7, ay - 3.5); ctx.lineTo(x + dir * 7, ay + 3.5); ctx.closePath(); ctx.fill(); };
+      hd(xa, 1); hd(xb, -1);
+      ctx.font = "bold 8.5px Arial"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+      ctx.fillText(m.text, (xa + xb) / 2, ay + 4);
+    });
+    if (bi.legend.length) {
+      const ly = y0 + bi.lanes * 26 + 4;
+      ctx.font = "9.5px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillStyle = "#c62828";
+      bi.legend.forEach((row, r) => {
+        let lx = area.left;
+        row.forEach(t => { ctx.fillText(t, lx, ly + r * 15 + 7); lx += ctx.measureText(t).width + 26; });
+      });
+    }
+    if (A) {
+      const ki = Math.min(Math.floor(A.k), cr.length - 1), cx = xs.getPixelForValue(A.k), cy = ys.getPixelForValue(cr[ki].r.speed);
+      ctx.strokeStyle = "#2e7d32"; ctx.fillStyle = "#2e7d32"; ctx.lineWidth = 1; ctx.setLineDash([2, 3]);
+      ctx.beginPath(); ctx.moveTo(cx, area.top); ctx.lineTo(cx, area.bottom); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.arc(cx, cy, 4.5, 0, Math.PI * 2); ctx.fill();
+    }
+    if (mx && !(A && cr.findIndex(o => o.i === mx.i) > A.k)) {
+      const mk = cr.findIndex(o => o.i === mx.i);
+      const x = xs.getPixelForValue(mk), y = ys.getPixelForValue(mx.row.speed);
+      const blue = "#1565c0";
+      ctx.font = "bold 8.5px Arial";
+      const txt = "MAX " + mx.row.speed, tw = ctx.measureText(txt).width, pw = tw + 8, ph = 15;
+      // label box placed away from the line (up-left, or up-right near the left edge)
+      let lx = x - 45;
+      if (lx - pw / 2 < area.left + 2) lx = x + 45;
+      lx = Math.min(Math.max(lx, area.left + pw / 2 + 2), area.right - pw / 2 - 2);
+      let ly = Math.max(y - 30, area.top + ph / 2 + 2);
+      // arrow from label box to the max point
+      const ax = lx, ay = ly + ph / 2;
+      const ang = Math.atan2(y - ay, x - ax);
+      const ex = x - Math.cos(ang) * 7, ey = y - Math.sin(ang) * 7;
+      ctx.strokeStyle = blue; ctx.fillStyle = blue; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(ex, ey);
+      ctx.lineTo(ex - 7 * Math.cos(ang - 0.4), ey - 7 * Math.sin(ang - 0.4));
+      ctx.lineTo(ex - 7 * Math.cos(ang + 0.4), ey - 7 * Math.sin(ang + 0.4));
+      ctx.closePath(); ctx.fill();
+      // max point dot
+      ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.stroke();
+      // label box (white background so the graph line never overlaps the text)
+      ctx.fillStyle = "#fff"; ctx.strokeStyle = blue; ctx.lineWidth = 1;
+      ctx.fillRect(lx - pw / 2, ly - ph / 2, pw, ph);
+      ctx.strokeRect(lx - pw / 2, ly - ph / 2, pw, ph);
+      ctx.fillStyle = blue; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(txt, lx, ly + 0.5);
+    }
+    ctx.restore();
+  }
+};
+
+// Label syntax in LABEL column:
+//   "D1 BYL HOME" / "D-2 BYL STR"  -> point D1/D2 (legend below chart shows the description)
+//   "D1-D3"                        -> distance between point D1 and point D3
+function parseLbl(t) {
+  t = (t || "").trim();
+  let m = t.match(/^D-?\s*(\d+)\s*-\s*D-?\s*(\d+)$/i);
+  if (m) return { t: "range", a: +m[1], b: +m[2] };
+  m = t.match(/^D-?\s*(\d+)(?:\s|[-:]|$)(.*)$/i);
+  if (m) return { t: "point", n: +m[1], desc: m[2].replace(/^[\s\-:]+/, "").trim() };
+  return { t: "plain" };
+}
+
+// Layout of the area under the time axis: distance arrows (in separate lanes) + legend
+function bottomInfo(ctx, W) {
+  const cr = chartRows(), pts = [], ranges = [];
+  cr.forEach((o, k) => {
+    const p = parseLbl(o.r.label);
+    if (p.t === "point" && !pts.some(q => q.n === p.n)) pts.push({ n: p.n, k, r: o.r, desc: p.desc });
+    else if (p.t === "range") ranges.push(p);
+  });
+  // ranges typed in the ADD DISTANCE box (e.g. "D1-D2, D2-D3")
+  const di = document.getElementById("distIn");
+  if (di) di.value.split(/[,;\s]+/).forEach(tok => { const p = parseLbl(tok); if (p.t === "range") ranges.push(p); });
+  // distance (km) of each row: Medha file has it; otherwise integrate speed over time
+  const cum = new Map();
+  if (mode === "medha") rows.forEach(r => cum.set(r, r.dist));
+  else { let t = 0; rows.forEach((r, i) => { if (i) t += rows[i - 1].speed * Math.max(0, (r.ts - rows[i - 1].ts) / 3600000); cum.set(r, t); }); }
+  pts.sort((x, y) => x.n - y.n);
+  const byN = new Map(pts.map(p => [p.n, p]));
+  const L = 50, R = W - 10, nn = Math.max(cr.length - 1, 1), px = k => L + (R - L) * k / nn;
+  ctx.save();
+  ctx.font = "bold 8.5px Arial";
+  const items = [];
+  const seen = new Set();
+  ranges.forEach(g => {
+    const key = g.a + "-" + g.b; if (seen.has(key)) return; seen.add(key);
+    const A = byN.get(g.a), B = byN.get(g.b);
+    if (!A || !B || A === B) return;
+    const km = Math.abs(cum.get(B.r) - cum.get(A.r));
+    const text = "D" + g.a + "-D" + g.b + ": " + km.toFixed(3) + " km";
+    const k1 = Math.min(A.k, B.k), k2 = Math.max(A.k, B.k), tw = ctx.measureText(text).width;
+    const mid = (px(k1) + px(k2)) / 2;
+    items.push({ k1, k2, text, s: Math.min(px(k1), mid - tw / 2), e: Math.max(px(k2), mid + tw / 2) });
+  });
+  items.sort((x, y) => x.s - y.s);
+  const laneEnd = [];
+  items.forEach(it => {
+    let l = laneEnd.findIndex(e => it.s >= e + 14);
+    if (l < 0) { l = laneEnd.length; laneEnd.push(0); }
+    laneEnd[l] = it.e; it.lane = l;
+  });
+  const lanes = laneEnd.length;
+  ctx.font = "9.5px Arial";
+  const legend = [[]];
+  let lw = 0;
+  pts.forEach(p => {
+    const t = "D" + p.n + (p.desc ? " - " + p.desc : ""), w = ctx.measureText(t).width + 26;
+    if (lw + w > W - 20 && legend[legend.length - 1].length) { legend.push([]); lw = 0; }
+    legend[legend.length - 1].push(t); lw += w;
+  });
+  if (!pts.length) legend.length = 0;
+  ctx.restore();
+  const P = (lanes || legend.length) ? 6 + lanes * 26 + 4 + legend.length * 15 + 4 : 0;
+  return { items, lanes, legend, P };
+}
+
+function chartPNG() {
+  const cv = document.createElement("canvas");
+  cv.width = 1100; cv.height = 500;
+  const tmp = new Chart(cv, chartConfig(true));
+  const png = cv.toDataURL("image/png");
+  tmp.destroy();
+  return png;
+}
+
+// Chart rows: a run of consecutive 0-speed rows is shown as ONE point (the first),
+// so stopped time does not stretch the graph. Rows with a label are always kept.
+function chartRows() {
+  const out = [];
+  rows.forEach((r, i) => {
+    if (r.speed !== 0 || i === 0 || rows[i - 1].speed !== 0 || (r.label && r.label.trim())) out.push({ r, i });
+  });
+  return out;
+}
+
+function chartConfig(forExport) {
+  const cr = chartRows();
+  const title = $("ctitle").value.trim();
+  const medha = false;
+  return {
+    type: "line",
+    data: medha ? {
+      datasets: [{ label: "Speed", data: cr.map(o => ({ x: o.r.dist, y: o.r.speed })), borderColor: "#1f4e79", borderWidth: 1.5, pointRadius: 0, tension: 0 }]
+    } : {
+      labels: cr.map(o => o.r.time),
+      datasets: [{ label: "Speed", data: cr.map(o => o.r.speed), borderColor: "#1f4e79", borderWidth: 1.5, pointRadius: 0, tension: 0 }]
+    },
+    options: {
+      responsive: !forExport, maintainAspectRatio: false, animation: false,
+      layout: { padding: { bottom: 0 } },
+      devicePixelRatio: forExport ? 1 : undefined,
+      parsing: medha ? false : undefined,
+      normalized: medha ? true : undefined,
+      scales: {
+        x: medha
+          ? { type: "linear", title: { display: true, text: "Distance (km)" }, ticks: { maxTicksLimit: 12 } }
+          : { title: { display: true, text: "Time (hh:mm:ss)", font: { size: 10 } }, ticks: { font: { size: 9 }, maxTicksLimit: 12, maxRotation: 45, callback: function (v) { return this.getLabelForValue(v); } } },
+        y: { title: { display: true, text: "Speed", font: { size: 10 } }, ticks: { font: { size: 9 } }, beginAtZero: true }
+      },
+      plugins: {
+        legend: { display: false },
+        title: { display: !!title, text: title, color: "#4e342e", font: { size: 17 } },
+        decimation: medha ? { enabled: true, algorithm: "min-max" } : { enabled: false },
+        tooltip: medha
+          ? { callbacks: { title: items => "Distance " + items[0].parsed.x + " km", label: it => "Speed " + it.parsed.y + "  (" + cr[it.dataIndex].r.time + ")" } }
+          : { callbacks: { title: items => items[0].label } }
+      }
+    },
+    plugins: [marksPlugin, { id: "bg", beforeDraw(c) { const x = c.ctx; x.save(); x.fillStyle = "#fff"; x.fillRect(0, 0, c.width, c.height); x.restore(); } }]
+  };
+}
+
+function drawChart() {
+  animStop();
+  const wrap = $("chartWrap");
+  if (!$("plot").checked) {
+    wrap.classList.add("hide");
+    if (chart) { chart.destroy(); chart = null; }
+    return;
+  }
+  wrap.classList.remove("hide");
+  if (chart) chart.destroy();
+  chart = new Chart($("chart"), chartConfig(false));
+}
+
+// ---------- Animated playback ----------
+// Cumulative distance (km) for every chart point
+function chartCum() {
+  const cr = chartRows(), cm = new Map();
+  if (mode === "medha") rows.forEach(r => cm.set(r, r.dist));
+  else { let t = 0; rows.forEach((r, i) => { if (i) t += rows[i - 1].speed * Math.max(0, (r.ts - rows[i - 1].ts) / 3600000); cm.set(r, t); }); }
+  return cr.map(o => cm.get(o.r));
+}
+function chartPoints() {
+  const pts = [];
+  chartRows().forEach((o, k) => {
+    const p = parseLbl(o.r.label);
+    if (p.t === "point" && !pts.some(q => q.n === p.n)) pts.push({ n: p.n, k, desc: p.desc });
+  });
+  return pts.sort((a, b) => a.n - b.n);
+}
+// What to show when the train is at chart index ki.
+// Points are taken in order D1, D2, D3 ...: the first point not yet passed is the target
+// (distance still to go to it); every point already passed shows the distance run since passing it.
+function animReadout(ki, pts, cum) {
+  const here = cum[ki];
+  const list = pts.map(p => ({ p, passed: p.k <= ki, d: Math.abs(here - cum[p.k]) }));
+  const next = list.find(x => !x.passed) || null;
+  const passedList = list.filter(x => x.passed);
+  const last = passedList.length ? passedList.reduce((a, b) => b.p.k > a.p.k ? b : a) : null;
+  return { list, next, last, here };
+}
+let animRAF = 0;
+function animStop() {
+  if (animRAF) cancelAnimationFrame(animRAF);
+  animRAF = 0;
+  if (chart && chart.$anim) { chart.$anim = null; try { chart.draw(); } catch (e) {} }
+  const b = $("animBox"); if (b) b.classList.add("hide");
+  const bt = $("anim"); if (bt) bt.innerHTML = "&#9654; Show Animation";
+}
+function animPanel(a) {
+  const cr = chartRows(), ki = Math.min(Math.floor(a.k), cr.length - 1), r = cr[ki].r;
+  const R = animReadout(ki, a.pts, a.cum);
+  let h = `<div class="big"><span>Time <b>${r.time}</b></span><span>Speed <b>${r.speed}</b> km/h</span><span>Run <b>${(R.here - a.cum[0]).toFixed(3)}</b> km</span>`;
+  if (R.next) h += `<span>Distance to D${R.next.p.n}${R.next.p.desc ? " (" + R.next.p.desc + ")" : ""} <b>${R.next.d.toFixed(3)}</b> km</span>`;
+  if (R.last) h += `<span>Distance from D${R.last.p.n} <b>${R.last.d.toFixed(3)}</b> km</span>`;
+  h += `</div>`;
+  if (!a.pts.length) h += `<div style="color:#777">Mark points in the LABEL column (e.g. "D1 BYL HOME", "D2 STR") to see distances from each point.</div>`;
+  else h += `<div class="chips">` + R.list.map(x => `<div class="chip ${x.passed ? "done" : (R.next && R.next.p === x.p ? "next" : "")}">D${x.p.n}${x.p.desc ? " " + x.p.desc : ""}: ${x.passed ? "passed &#10003; &nbsp;" + x.d.toFixed(3) + " km from it" : (R.next && R.next.p === x.p ? "next &#9654; " + x.d.toFixed(3) + " km to go" : "not reached")}</div>`).join("") + `</div>`;
+  $("animBox").innerHTML = h;
+}
+$("anim").addEventListener("click", () => {
+  if (animRAF || (chart && chart.$anim && chart.$anim.k < chart.$anim.n - 1)) { animStop(); return; }
+  if (!rows.length) { alert("Load a file first."); return; }
+  if (!$("plot").checked) { $("plot").checked = true; }
+  drawChart();
+  const cr = chartRows(), n = cr.length;
+  if (n < 2) return;
+  chart.$anim = { k: 0, n, pts: chartPoints(), cum: chartCum(), last: 0 };
+  $("animBox").classList.remove("hide");
+  $("anim").innerHTML = "&#9632; Stop";
+  const step = ts => {
+    if (!chart || !chart.$anim) return;
+    const a = chart.$anim;
+    if (!a.last) a.last = ts;
+    const dur = (+$("animDur").value || 20) / (+$("animSpd").value || 1);
+    a.k = Math.min(a.n - 1, a.k + (ts - a.last) / 1000 * (a.n - 1) / dur);
+    a.last = ts;
+    chart.draw(); animPanel(a);
+    if (a.k >= a.n - 1) { animRAF = 0; $("anim").innerHTML = "&#8635; Replay"; return; }
+    animRAF = requestAnimationFrame(step);
+  };
+  animRAF = requestAnimationFrame(step);
+});
+
+const TYPE_ACCEPT = { "MEDHA MEMU": ".txt,text/plain", "MEDHA 3PH": ".txt,text/plain", RTIS: ".csv,text/csv", TELPRO: ".xlsx,.xls", MRT: ".csv,text/csv" };
+$("ftype").addEventListener("change", () => {
+  const t = $("ftype").value, f = $("file");
+  f.value = "";
+  f.disabled = !t;
+  f.accept = TYPE_ACCEPT[t] || ".txt,.csv,text/plain,text/csv";
+});
+
+$("file").addEventListener("change", e => {
+  const f = e.target.files[0];
+  const t = $("ftype").value;
+  if (!f) return;
+  if (t !== "MEDHA MEMU" && t !== "MEDHA 3PH" && t !== "RTIS" && t !== "TELPRO" && t !== "MRT") {
+    alert(t + " file format is not configured yet.");
+    e.target.value = "";
+    return;
+  }
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const data = t === "TELPRO" ? parseTelpro(rd.result) : t === "MRT" ? parseMRT(rd.result) : t === "MEDHA 3PH" ? parseMedha3P(rd.result) : t === "MEDHA MEMU" ? parseMedha(rd.result) : parseCSV(rd.result);
+      if (!data.length) throw new Error("No valid rows found.");
+      allRows = data;
+      fileName = f.name.replace(/\.(csv|txt|xlsx|xls)$/i, "");
+      setMode(t === "MEDHA MEMU" || t === "MEDHA 3PH" || t === "TELPRO" || t === "MRT" ? "medha" : "csv");
+      $("apply").disabled = false;
+      $("reset").disabled = false;
+      applyFilter();
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+  if (t === "TELPRO") rd.readAsArrayBuffer(f); else rd.readAsText(f);
+});
+
+$("apply").addEventListener("click", applyFilter);
+$("reset").addEventListener("click", () => {
+  ["fd", "ft", "td", "tt"].forEach(id => $(id).value = "");
+  applyFilter();
+});
+$("plot").addEventListener("change", drawChart);
+$("ctitle").addEventListener("input", drawChart);
+$("distIn").addEventListener("input", drawChart);
+
+function getInfo() {
+  const out = [
+    ["TRAIN NO", $("tno").value.trim()],
+    ["LOCO NO", $("lno").value.trim()],
+    ["LP NAME/HQ", $("lpn").value.trim()],
+    ["DATA", $("dtx").value.trim()],
+    ["SECTION", $("sec").value.trim()]
+  ];
+  document.querySelectorAll(".cust").forEach(d => {
+    const h = d.querySelector(".chd").value.trim(), v = d.querySelector(".cvl").value.trim();
+    if (h || v) out.push([h || "-", v]);
+  });
+  return out;
+}
+
+// ---- Summary of SPM analysis (numbered rows) ----
+const sumBody = $("sumTbl").querySelector("tbody");
+function renumber() { [...sumBody.rows].forEach((tr, i) => tr.cells[0].textContent = i + 1); }
+function addSumRow() {
+  const tr = sumBody.insertRow();
+  tr.innerHTML = '<td style="text-align:center"></td><td><textarea rows="2"></textarea></td><td style="text-align:center"><button type="button" class="del" title="Delete row">\u2715</button></td>';
+  renumber();
+  return tr;
+}
+$("sumChk").addEventListener("change", () => {
+  $("sumBox").classList.toggle("hide", !$("sumChk").checked);
+  if ($("sumChk").checked && !sumBody.rows.length) addSumRow();
+});
+$("addRow").addEventListener("click", () => addSumRow().querySelector("textarea").focus());
+sumBody.addEventListener("click", e => {
+  if (!e.target.classList.contains("del")) return;
+  e.target.closest("tr").remove();
+  if (!sumBody.rows.length) addSumRow();
+  renumber();
+});
+function getSummary() {
+  if (!$("sumChk").checked) return [];
+  return [...sumBody.querySelectorAll("textarea")].map(t => t.value.trim()).filter(Boolean);
+}
+
+$("dl").addEventListener("click", async () => {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("RTIS Data");
+  const info = getInfo();
+  info.forEach(([k, v], n) => {
+    const r = ws.addRow([k, v]);
+    r.getCell(1).font = { bold: true };
+    r.getCell(2).alignment = { horizontal: "left" };
+    ws.mergeCells(`B${n + 1}:E${n + 1}`);
+  });
+  ws.addRow([]);
+  ws.addRow(["DATE", "TIME", "SPEED", colName(), "LABEL"]).font = { bold: true };
+  rows.forEach(r => ws.addRow([r.date, r.time, r.speed, colVal(r), r.label]));
+  [14, 10, 8, 24, 30].forEach((w, i) => ws.getColumn(i + 1).width = w);
+
+  // Sheet 2: GRAPH (chart drawn off-screen and inserted as an image)
+  const gs = wb.addWorksheet("GRAPH");
+  const png = chartPNG();
+  const imgId = wb.addImage({ base64: png, extension: "png" });
+  info.forEach(([k, v], n) => {
+    const r = gs.addRow([k, v]);
+    r.getCell(1).font = { bold: true };
+    r.getCell(2).alignment = { horizontal: "left" };
+    gs.mergeCells(`B${n + 1}:F${n + 1}`);
+  });
+  gs.getColumn(1).width = 16;
+  gs.getColumn(2).width = 30;
+  gs.addImage(imgId, { tl: { col: 0, row: info.length + 1 }, ext: { width: 1100, height: 500 } });
+  [3, 4, 5, 6].forEach(c => gs.getColumn(c).width = 20);
+  const sm = getSummary();
+  if (sm.length) {
+    const r0 = info.length + 29;
+    const hc = gs.getRow(r0).getCell(1);
+    hc.value = "SUMMARY OF SPM ANALYSIS"; hc.font = { bold: true, size: 12 };
+    sm.forEach((t, i) => {
+      const r = r0 + 1 + i;
+      gs.getRow(r).getCell(1).value = i + 1;
+      gs.getRow(r).getCell(1).alignment = { horizontal: "center", vertical: "top" };
+      gs.getRow(r).getCell(2).value = t;
+      gs.getRow(r).getCell(2).alignment = { wrapText: true, vertical: "top" };
+      gs.mergeCells(`B${r}:F${r}`);
+      gs.getRow(r).height = Math.max(15, Math.ceil(t.length / 90) * 15);
+    });
+  }
+
+  const buf = await wb.xlsx.writeBuffer();
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  a.download = fileName + ".xlsx";
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+});
+
+$("pdf").addEventListener("click", () => {
+  const btn = $("pdf");
+  btn.disabled = true; btn.textContent = "Generating PDF...";
+  setTimeout(() => {
+    try {
+      const doc = new jspdf.jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+      const PW = 297, PH = 210, M = 10, CW = PW - 2 * M;
+      const NAVY = [31, 58, 95], LIGHT = [229, 236, 245], MID = [190, 204, 220], ZEBRA = [243, 247, 251];
+      const band = (y, h, text, size) => {
+        doc.setFillColor(...NAVY); doc.rect(M, y, CW, h, "F");
+        doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(size);
+        doc.text(text, PW / 2, y + h / 2 + size * 0.14, { align: "center" });
+      };
+      // ---- title band ----
+      doc.setFillColor(...NAVY); doc.rect(M, 8, CW, 16, "F");
+      doc.setTextColor(255, 255, 255); doc.setFont("helvetica", "bold"); doc.setFontSize(15);
+      doc.text("SPM / RTIS DATA CHART AND GRAPHICAL VIEW", PW / 2, 15.5, { align: "center" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+      doc.text("Raipur Division", PW / 2, 21, { align: "center" });
+      doc.setDrawColor(111, 163, 216); doc.setLineWidth(0.8); doc.line(M, 24.4, M + CW, 24.4);
+
+      // ---- journey details (label row + value row, 5 per line) ----
+      const info = getInfo(), per = 5, body = [];
+      for (let i = 0; i < info.length; i += per) {
+        const part = info.slice(i, i + per);
+        while (part.length < per) part.push(["", ""]);
+        body.push(part.map(x => x[0]));
+        body.push(part.map(x => x[1]));
+      }
+      const cs = {}; for (let i = 0; i < per; i++) cs[i] = { cellWidth: CW / per };
+      doc.autoTable({
+        startY: 27, body, theme: "grid", margin: { left: M, right: M }, columnStyles: cs,
+        styles: { fontSize: 9, cellPadding: 1.5, lineColor: MID, lineWidth: 0.2, textColor: [25, 25, 25], valign: "middle", minCellHeight: 6.5 },
+        didParseCell: d => {
+          if (d.row.index % 2 === 0) { d.cell.styles.fillColor = LIGHT; d.cell.styles.fontStyle = "bold"; d.cell.styles.fontSize = 7.5; d.cell.styles.textColor = NAVY; d.cell.styles.minCellHeight = 5; }
+        }
+      });
+
+      // ---- key figures table ----
+      const first = rows[0], last = rows[rows.length - 1], mx = maxInfo();
+      const rd = rangeDist();
+      doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 3, theme: "grid", margin: { left: M, right: M },
+        head: [["FILE", "FROM", "TO", "ROWS", "MAX SPEED", mode === "medha" ? "DISTANCE (FROM - TO)" : "MAX SPEED LOCATION"]],
+        body: [[
+          fileName,
+          first.date + " " + first.time,
+          last.date + " " + last.time,
+          String(rows.length),
+          mx.row.speed + " km/h  (" + mx.row.time + ")",
+          mode === "medha" ? rd.split(": ")[1] : (mx.row.code || "-")
+        ]],
+        styles: { fontSize: 8.5, cellPadding: 1.5, halign: "center", lineColor: MID, lineWidth: 0.2, textColor: [25, 25, 25] },
+        headStyles: { fillColor: NAVY, textColor: 255, fontSize: 7.5 },
+        columnStyles: { 0: { cellWidth: 84 } }
+      });
+
+      // ---- chart ----
+      let cy = doc.lastAutoTable.finalY + 3, cw = 262, ch = cw * 500 / 1100;
+      if (cy + ch > PH - 12) { ch = PH - 12 - cy; cw = ch * 1100 / 500; }
+      doc.setDrawColor(...MID); doc.setLineWidth(0.3);
+      doc.rect((PW - cw) / 2 - 0.5, cy - 0.5, cw + 1, ch + 1);
+      doc.addImage(chartPNG(), "PNG", (PW - cw) / 2, cy, cw, ch);
+
+      // ---- summary of SPM analysis (below chart) ----
+      const sm = getSummary();
+      let nextY = null;
+      if (sm.length) {
+        let sy = cy + ch + 5;
+        if (sy > PH - 45) { doc.addPage(); sy = 12; }
+        band(sy, 7, "SUMMARY OF SPM ANALYSIS", 10);
+        doc.autoTable({
+          startY: sy + 7, theme: "grid", margin: { left: M, right: M, bottom: 12 },
+          head: [["NO.", "OBSERVATION"]], body: sm.map((t, i) => [String(i + 1), t]),
+          styles: { fontSize: 9, cellPadding: 2, lineColor: MID, lineWidth: 0.2, textColor: [25, 25, 25], valign: "middle" },
+          headStyles: { fillColor: LIGHT, textColor: NAVY, fontSize: 8, halign: "center" },
+          columnStyles: { 0: { cellWidth: 16, halign: "center", fontStyle: "bold" } },
+          alternateRowStyles: { fillColor: ZEBRA }
+        });
+        nextY = doc.lastAutoTable.finalY + 8;
+      }
+
+      // ---- data table (continues on the summary page when there is room) ----
+      if (nextY === null || nextY > PH - 40) { doc.addPage(); nextY = 8; }
+      band(nextY, 7, "DATA TABLE  (" + rows.length + " rows)", 10);
+      doc.autoTable({
+        startY: nextY + 9, theme: "grid",
+        head: [["DATE", "TIME", "SPEED", colName(), "LABEL"]],
+        body: rows.map(r => [r.date, r.time, r.speed, colVal(r), r.label]),
+        styles: { fontSize: 7.5, cellPadding: 1, halign: "center", lineColor: MID, lineWidth: 0.15, textColor: [25, 25, 25] },
+        headStyles: { fillColor: NAVY, textColor: 255 },
+        alternateRowStyles: { fillColor: ZEBRA },
+        margin: { left: M, right: M, top: 12, bottom: 12 }
+      });
+
+      // ---- footer on every page ----
+      const n = doc.getNumberOfPages(), stamp = new Date().toLocaleString("en-GB");
+      for (let i = 1; i <= n; i++) {
+        doc.setPage(i);
+        doc.setDrawColor(...MID); doc.setLineWidth(0.3); doc.line(M, PH - 9, PW - M, PH - 9);
+        doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(90, 90, 90);
+        doc.text("Raipur Division  |  Generated " + stamp, M, PH - 5);
+        doc.text("Page " + i + " of " + n, PW - M, PH - 5, { align: "right" });
+      }
+      doc.save(fileName + ".pdf");
+    } catch (err) { alert("PDF error: " + err.message); }
+    btn.disabled = false; btn.textContent = "Generate PDF";
+  }, 50);
+});
+</script>
+</body>
+</html>
