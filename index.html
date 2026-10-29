@@ -146,7 +146,7 @@
   <div class="card">
     <label id="dataHead">Data</label>
     <div class="scroll">
-    <table id="preview"><thead><tr><th style="width:90px">DATE</th><th style="width:80px">TIME</th><th style="width:60px">SPEED</th><th id="thCode" style="width:120px">LAST/CUR LOCATION CODE</th><th>LABEL (text typed here is marked on the graph)</th></tr></thead><tbody></tbody></table>
+    <table id="preview"><thead><tr><th style="width:90px">DATE</th><th style="width:80px">TIME</th><th style="width:60px">SPEED</th><th id="thCode" style="width:120px">LAST/CUR LOCATION CODE</th><th id="thCode2" style="width:120px;display:none">LAST/CUR LOCATION CODE</th><th>LABEL (text typed here is marked on the graph)</th></tr></thead><tbody></tbody></table>
     </div>
   </div>
 </div>
@@ -156,12 +156,14 @@ let allRows = [];     // {ts, date, time, speed, code}
 let rows = [];        // filtered
 let chart = null;
 let fileName = "output";
+let showCode = false; // RTIS with distance: show distance AND code columns
 let mode = "csv";     // "csv" (RTIS) or "medha" (Medha TXT)
 const colName = () => mode === "medha" ? "DISTANCE (KM)" : "LAST/CUR LOCATION CODE";
 const colVal = r => mode === "medha" ? r.dist : r.code;
 function setMode(m) {
   mode = m;
   $("thCode").textContent = colName();
+  $("thCode2").style.display = showCode ? "" : "none";
   $("plotLbl").textContent = m === "medha" ? "Plot Time vs Speed" : "Plot Time vs Speed";
 }
 
@@ -293,19 +295,25 @@ function parseCSV(text) {
   const iTime = header.findIndex(h => h.includes("logging"));
   let iSpeed = header.indexOf("speed");
   const iCode = header.findIndex(h => h.includes("stationcode") || h.includes("station"));
+  const iDist = header.findIndex(h => h.replace(/\s/g, "") === "distfromspeed"); // metres travelled in that second
   if (iTime < 0 || iSpeed < 0 || iCode < 0) throw new Error("Expected columns not found (Logging Time, Speed, stationCode).");
   const out = [];
   for (let i = 1; i < lines.length; i++) {
     const c = lines[i].split(",");
     const t = (c[iTime] || "").trim();
-    // CSV format: M/D/YYYY H:mm[:ss]
-    const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
-    if (!m) continue;
-    const [_, mo, d, y, h, mi, s] = m;
+    // CSV formats: YYYY-MM-DD HH:mm:ss (new RTIS)  or  M/D/YYYY H:mm[:ss] (old)
+    let m = t.match(/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    let y, mo, d, h, mi, s;
+    if (m) { [, y, mo, d, h, mi, s] = m; }
+    else {
+      m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ T](\d{1,2}):(\d{2})(?::(\d{2}))?/);
+      if (!m) continue;
+      [, mo, d, y, h, mi, s] = m;
+    }
     const dt = new Date(+y, +mo - 1, +d, +h, +mi, +(s || 0));
     if (isNaN(dt)) continue;
     const sp = Math.round(parseFloat(c[iSpeed]));
-    out.push({
+    const o = {
       ts: dt.getTime(),
       minKey: dt.getTime() - (+(s || 0)) * 1000,
       hasSec: s !== undefined,
@@ -314,8 +322,12 @@ function parseCSV(text) {
       speed: isNaN(sp) ? 0 : sp,
       code: (c[iCode] || "").trim(),
       label: ""
-    });
+    };
+    if (iDist >= 0) { const dm = parseFloat(c[iDist]); o.m = isNaN(dm) ? 0 : dm; }
+    out.push(o);
   }
+  // running total (km) from distFromSpeed
+  if (iDist >= 0) { let cum = 0; out.forEach(r => { cum += r.m; r.dist = +(cum / 1000).toFixed(3); }); }
   // The source logs ~1 row per second but stores only hh:mm. If a minute has
   // no seconds, rebuild them from row order: 1st row = :00, 2nd = :01, ...
   // The first minute of the file is usually cut off at the start, so its rows
@@ -437,13 +449,13 @@ function render() {
   $("dataHead").textContent = `Data (${rows.length} rows)`;
   const tb = $("preview").querySelector("tbody");
   tb.innerHTML = rows.map((r, i) =>
-    `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.speed}</td><td>${colVal(r)}</td><td><input class="lbl" data-i="${i}" value="${r.label.replace(/"/g, "&quot;")}"></td></tr>`).join("");
+    `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.speed}</td><td>${colVal(r)}</td>${showCode ? `<td>${r.code}</td>` : ""}<td><input class="lbl" data-i="${i}" value="${r.label.replace(/"/g, "&quot;")}"></td></tr>`).join("");
   $("dl").disabled = rows.length === 0;
   $("pdf").disabled = rows.length === 0;
   const mx = maxInfo(), box = $("maxbox");
   if (mx) {
     const rd = rangeDist();
-    box.textContent = `\u25B2 MAX SPEED: ${mx.row.speed}  (at ${mx.row.time} on ${mx.row.date}, ${mode === "medha" ? "distance " + mx.row.dist + " km" : "code " + mx.row.code})` + (rd ? "\n" + rd : "");
+    box.textContent = `\u25B2 MAX SPEED: ${mx.row.speed}  (at ${mx.row.time} on ${mx.row.date}, ${mode === "medha" ? "distance " + mx.row.dist + " km" + (showCode ? ", code " + mx.row.code : "") : "code " + mx.row.code})` + (rd ? "\n" + rd : "");
     box.style.whiteSpace = "pre-line";
     box.classList.remove("hide");
   } else box.classList.add("hide");
@@ -824,7 +836,9 @@ $("file").addEventListener("change", e => {
       if (!data.length) throw new Error("No valid rows found.");
       allRows = data;
       fileName = f.name.replace(/\.(csv|txt|xlsx|xls)$/i, "");
-      setMode(t === "MEDHA MEMU" || t === "MEDHA 3PH" || t === "TELPRO" || t === "MRT" ? "medha" : "csv");
+      const rtisDist = t === "RTIS" && data[0].m !== undefined;
+      showCode = rtisDist;
+      setMode(t === "MEDHA MEMU" || t === "MEDHA 3PH" || t === "TELPRO" || t === "MRT" || rtisDist ? "medha" : "csv");
       $("apply").disabled = false;
       $("reset").disabled = false;
       applyFilter();
@@ -895,9 +909,9 @@ $("dl").addEventListener("click", async () => {
     ws.mergeCells(`B${n + 1}:E${n + 1}`);
   });
   ws.addRow([]);
-  ws.addRow(["DATE", "TIME", "SPEED", colName(), "LABEL"]).font = { bold: true };
-  rows.forEach(r => ws.addRow([r.date, r.time, r.speed, colVal(r), r.label]));
-  [14, 10, 8, 24, 30].forEach((w, i) => ws.getColumn(i + 1).width = w);
+  ws.addRow(showCode ? ["DATE", "TIME", "SPEED", colName(), "LAST/CUR LOCATION CODE", "LABEL"] : ["DATE", "TIME", "SPEED", colName(), "LABEL"]).font = { bold: true };
+  rows.forEach(r => ws.addRow(showCode ? [r.date, r.time, r.speed, colVal(r), r.code, r.label] : [r.date, r.time, r.speed, colVal(r), r.label]));
+  (showCode ? [14, 10, 8, 24, 24, 30] : [14, 10, 8, 24, 30]).forEach((w, i) => ws.getColumn(i + 1).width = w);
 
   // Sheet 2: GRAPH (chart drawn off-screen and inserted as an image)
   const gs = wb.addWorksheet("GRAPH");
@@ -1024,8 +1038,8 @@ $("pdf").addEventListener("click", () => {
       band(nextY, 7, "DATA TABLE  (" + rows.length + " rows)", 10);
       doc.autoTable({
         startY: nextY + 9, theme: "grid",
-        head: [["DATE", "TIME", "SPEED", colName(), "LABEL"]],
-        body: rows.map(r => [r.date, r.time, r.speed, colVal(r), r.label]),
+        head: [showCode ? ["DATE", "TIME", "SPEED", colName(), "CODE", "LABEL"] : ["DATE", "TIME", "SPEED", colName(), "LABEL"]],
+        body: rows.map(r => showCode ? [r.date, r.time, r.speed, colVal(r), r.code, r.label] : [r.date, r.time, r.speed, colVal(r), r.label]),
         styles: { fontSize: 7.5, cellPadding: 1, halign: "center", lineColor: MID, lineWidth: 0.15, textColor: [25, 25, 25] },
         headStyles: { fillColor: NAVY, textColor: 255 },
         alternateRowStyles: { fillColor: ZEBRA },
