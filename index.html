@@ -23,9 +23,10 @@
   .card > *:not(label:first-child) { margin-left: 62px; margin-right: 62px; }
   .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; }
   label { font-size: 13px; font-weight: 700; display: block; margin-bottom: 5px; color: #0d2340; }
-  input[type=date], input[type=time], input[type=text], select { padding: 6px 8px; border: 0 !important; border-radius: 0; background: #fff !important; color: #333; font-size: 13px; height: 28px; }
+  input[type=date], input[type=time], input[type=text], select { padding: 6px 8px; border: 0 !important; border-radius: 0; background: #fff !important; color: #000; font-size: 13px; height: 28px; }
   input[type=file] { padding: 4px; border: 0; background: #fff; font-size: 13px; }
   input:focus, select:focus { outline: 2px solid #8a8a8a; }
+  input[type=date], input[type=time], input[type=text]:not(.chd), select, textarea, input.lbl, input.cvl, #sumTbl input, #sumTbl textarea { color: #000 !important; }
   #tp { position: absolute; z-index: 50; background: #fff; border: 1px solid #888; box-shadow: 0 6px 18px rgba(0,0,0,.35); display: none; }
   #tp .cols { display: flex; }
   #tp .col { width: 54px; max-height: 190px; overflow-y: auto; border-right: 1px solid #ddd; }
@@ -40,16 +41,20 @@
   button { background: var(--btn); color: #fff; border: 0; padding: 8px 20px; border-radius: 0; cursor: pointer; font-size: 14px; font-family: inherit; }
   button:hover:not(:disabled) { background: #4a4a4a; }
   button:disabled { opacity: .5; cursor: not-allowed; }
-  #info { font-size: 13px; margin-top: 12px; padding: 7px 10px; background: #e4e4e4; color: #444; }
+  #info { font-size: 13px; margin-top: 12px; padding: 7px 10px; background: #e4e4e4; color: #1b7a1b; font-weight: 700; }
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th, td { border: 1px solid #d9d9d9; padding: 4px 8px; text-align: center; }
   th { background: var(--bar); color: #fff; font-weight: 400; }
   tbody tr { background: #fff; } tbody tr:nth-child(even) { background: #f1f1f1; }
   tbody tr:hover { background: #e2e2e2; }
-  .chartbox { position: relative; height: 400px; margin-top: 12px; background: #fff; padding: 6px; }
+  .chartbox { position: relative; height: 400px; margin-top: 12px; background: #fff; padding: 6px; border: 2px solid #1f4e79; box-sizing: border-box; }
   .hide { display: none; }
-  #anim { background: #1565c0; color: #fff; }
-  #anim:hover:not(:disabled) { background: #0d47a1; }
+  #pdf { display: inline-flex; align-items: center; gap: 6px; }
+  #pdf .pdfic { flex: none; }
+  .spin { display: inline-block; width: 20px; height: 20px; border: 3px solid #b9d9b9; border-top-color: #1b7a1b; border-radius: 50%; animation: spn .7s linear infinite; vertical-align: -5px; margin-right: 10px; }
+  @keyframes spn { to { transform: rotate(360deg); } }
+  #anim, #dl, #pdf, #apply, #reset { background: #1565c0; color: #fff; }
+  #anim:hover:not(:disabled), #dl:hover:not(:disabled), #pdf:hover:not(:disabled), #apply:hover:not(:disabled), #reset:hover:not(:disabled) { background: #0d47a1; }
   #animBox { margin-top: 10px; background: #fff; border-left: 6px solid #c62828; padding: 10px 14px; font-size: 14px; color: #333; }
   #animBox .big { display: flex; flex-wrap: wrap; gap: 26px; align-items: baseline; margin-bottom: 8px; }
   #animBox .big b { font-size: 20px; color: #c62828; }
@@ -63,7 +68,7 @@
   input.info { padding: 6px 8px; }
   .cust { display: flex; flex-direction: column; gap: 4px; width: 165px; }
   .cust input { width: 100%; }
-  input.chd { font-weight: 700; color: #0d2340; background: #e4e4e4 !important; }
+  input.chd { font-family: inherit; font-size: 13px; font-weight: 700; color: #0d2340; background: transparent !important; padding: 0 !important; height: auto; margin-bottom: 1px; }
   input.chd::placeholder { font-weight: 400; color: #777; }
   #sumBox { margin-top: 14px; }
   .sumHead { background: var(--bar); color: #4e2a1a; font-weight: 700; font-size: 14px; letter-spacing: 1px; text-align: center; padding: 8px; border-bottom: 3px solid #6b6b6b; }
@@ -75,6 +80,197 @@
   #maxbox { margin-top: 12px; padding: 10px 14px; background: #fff; border-left: 6px solid var(--bar); font-size: 14px; font-weight: 600; color: #444; }
   input[type=checkbox] { accent-color: #666; width: 20px; height: 20px; vertical-align: middle; margin: 0 6px 0 0; cursor: pointer; }
   .chk { color: #c62828; font-size: 16px; font-weight: 700; cursor: pointer; display: inline-flex !important; align-items: center; margin-bottom: 0; padding: 6px 4px; }
+
+  /* ================= MOBILE / TABLET ================= */
+  html { -webkit-text-size-adjust: 100%; }
+  .scroll { -webkit-overflow-scrolling: touch; overflow-x: scroll; overflow-y: auto; scrollbar-width: auto; scrollbar-color: #1565c0 #d0d0d0; }
+  #preview { min-width: 620px; }
+
+  @media (max-width: 900px) {
+    body { padding: 6px; }
+    h1 { font-size: 18px; padding: 20px 10px 16px; }
+    h1 .sub { font-size: 14px; letter-spacing: 1px; }
+    /* cards: replace the big 62px side margins with small ones */
+    .card { padding-bottom: 16px; }
+    .card > label:first-child { margin-left: 8px; margin-right: 8px; padding: 10px 8px 6px; font-size: 14px; }
+    .card > *:not(label:first-child) { margin-left: 10px; margin-right: 10px; }
+    .row { gap: 12px; }
+    /* every field becomes full width (overrides inline widths) */
+    .row > div { flex: 1 1 100%; min-width: 0; }
+    .row > div > input,
+    .row > div > select,
+    input.info, #ctitle, #distIn, #ftype, #file { width: 100% !important; min-width: 0 !important; max-width: 100%; }
+    input[type=date], input[type=time], input[type=text], select { height: 38px; font-size: 16px; }
+    input[type=file] { font-size: 14px; height: auto; }
+    input.t24 { width: 100% !important; }
+    /* time filter: two fields per line */
+    #fd, #ft, #td, #tt { width: 100% !important; }
+    .card:nth-of-type(2) .row > div:not(:last-child):not(:nth-last-child(2)) { flex: 1 1 calc(50% - 6px); }
+    .card:nth-of-type(2) .row > div:nth-last-child(-n+2) { flex: 1 1 calc(50% - 6px); }
+    button { padding: 10px 14px; font-size: 15px; min-height: 40px; }
+    #apply, #reset { width: 100%; }
+    /* custom heading boxes */
+    .cust { width: calc(50% - 6px); flex: 1 1 calc(50% - 6px); }
+    .cust input { height: 38px; }
+    input.chd { height: auto; font-size: 14px; }
+    /* checkboxes + chart */
+    .chk { font-size: 15px; }
+    .chartbox { height: 320px; padding: 2px; }
+    #maxbox, #animBox { font-size: 13px; }
+    #animBox .big { gap: 12px; }
+    #animBox .big b { font-size: 17px; }
+    /* animation + download controls */
+    .animctl > div { flex: 1 1 calc(50% - 6px); }
+    .animctl > div[style*="margin-left:auto"] { flex: 1 1 100%; margin-left: 0 !important; display: flex; flex-direction: column; align-items: stretch !important; gap: 10px !important; }
+    .animctl select, #anim, #dl, #pdf { width: 100%; }
+    #pdf { justify-content: center; }
+    /* summary table */
+    #sumTbl th:first-child { width: 40px !important; }
+    #sumTbl textarea { font-size: 16px; }
+    /* data table: always horizontally scrollable with visible scroll bar */
+    .scroll { max-height: 70vh; border: 1px solid #999; }
+    .scroll { scrollbar-width: thin; }
+    .scroll::-webkit-scrollbar { height: 3px; width: 0; -webkit-appearance: none; }
+    .scroll::-webkit-scrollbar-track { background: #d0d0d0; }
+    .scroll::-webkit-scrollbar-thumb { background: #1565c0; border-radius: 2px; }
+    input.lbl { min-width: 220px; font-size: 16px; height: 32px; }
+    th, td { padding: 4px 6px; white-space: nowrap; }
+    #tp { max-width: 96vw; }
+  }
+  @media (max-width: 480px) {
+    h1 { font-size: 16px; }
+    .cust { flex: 1 1 100%; width: 100%; }
+    .chartbox { height: 280px; }
+    .animctl > div { flex: 1 1 100%; }
+  }
+
+  /* ===== MOBILE BOTTOM NAV BAR (Show Animation, Download Excel, Generate PDF, PDF WITH DATA) ===== */
+  #botnav { display: none; }
+  @media (max-width: 900px) {
+    body { padding-bottom: 84px; }
+    #botnav { display: flex; align-items: stretch; gap: 4px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; background: #3a3a3a; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); box-shadow: 0 -3px 10px rgba(0,0,0,.35); }
+    #botnav > div { flex: 1 1 0; min-width: 0; margin: 0 !important; display: flex; }
+    #botnav button, #botnav .chk { width: 100%; min-height: 48px; padding: 4px 2px !important; font-size: 11px !important; line-height: 1.15; display: flex !important; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; border-radius: 4px; }
+    #botnav .chk { background: #666; color: #fff !important; font-weight: 700; margin: 0; }
+    #botnav .chk input { width: 18px; height: 18px; margin: 0; }
+    #botnav #pdf .pdfic { width: 16px; height: 16px; }
+    #botnav #pdf { flex-direction: column; gap: 2px; }
+    .animctl > div.moved-empty { display: none; }
+  }
+
+  /* ===== defaults for new elements (invisible on desktop, so desktop look is unchanged) ===== */
+  #chartInner { position: relative; width: 100%; height: 100%; }
+  #hbar, .mobonly { display: none; }
+
+  /* ===== MOBILE REFINEMENTS ===== */
+  @media (max-width: 900px) {
+    /* 1. slimmer bottom nav bar */
+    body { padding-bottom: 60px; }
+    #botnav { padding: 4px 6px calc(4px + env(safe-area-inset-bottom)); gap: 4px; }
+    #botnav button, #botnav .chk { min-height: 38px; font-size: 10.5px !important; padding: 2px !important; gap: 1px; }
+    #botnav .chk input { width: 16px; height: 16px; }
+    #botnav #pdf .pdfic { width: 14px; height: 14px; }
+
+    /* 1b. graph keeps a readable width and scrolls sideways instead of squeezing into one screen */
+    #chartWrap { overflow-x: scroll; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+    #chartInner { width: 1100px; min-width: 1100px; }
+    #chartWrap { scrollbar-width: thin; }
+    #chartWrap::-webkit-scrollbar { height: 3px; -webkit-appearance: none; }
+    #chartWrap::-webkit-scrollbar-track { background: #d0d0d0; }
+    #chartWrap::-webkit-scrollbar-thumb { background: #1565c0; border-radius: 2px; }
+
+    /* 2. Speed + Animation time + Pause in ONE row */
+    .animctl { flex-wrap: nowrap !important; gap: 6px !important; align-items: flex-end !important; }
+    .animctl > div { flex: 1 1 0 !important; min-width: 0; }
+    .animctl > div > label { font-size: 11px; margin-bottom: 3px; white-space: nowrap; }
+    .animctl select { height: 34px !important; font-size: 14px !important; padding: 4px !important; }
+    #pauseWrap { display: block; }
+    #pause { width: 100%; height: 34px; min-height: 0; padding: 0 4px; font-size: 13px; background: #e65100; color: #fff; white-space: nowrap; }
+    #pause:hover:not(:disabled) { background: #bf360c; }
+    .mobonly { display: block; }
+    .animctl > div.ibw { flex: 0 0 38px !important; }
+    .animctl .ib { width: 100%; height: 34px; min-height: 0; padding: 0 !important; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+    .ib svg, #anim svg { width: 20px; height: 20px; fill: currentColor; pointer-events: none; }
+    #stop { background: #c62828; } #stop:hover:not(:disabled) { background: #8e1b1b; }
+    #rev { background: #6a1b9a; } #rev:hover:not(:disabled) { background: #4a148c; }
+    #botnav #anim svg { width: 22px; height: 22px; }
+    #pp { background: #1565c0; } #pp:hover:not(:disabled) { background: #0d47a1; }
+    #pp svg { width: 16px; height: 16px; fill: #fff; flex: none; }
+    #botnav #pp { flex-direction: column; gap: 1px; }
+
+    /* frozen DATE + TIME columns while the table is scrolled sideways */
+    #preview th:nth-child(1), #preview td:nth-child(1), #preview th:nth-child(2), #preview td:nth-child(2) { position: sticky; box-sizing: border-box; background-clip: padding-box; }
+    #preview th:nth-child(1), #preview td:nth-child(1) { left: 0; width: 84px; min-width: 84px; max-width: 84px; }
+    #preview th:nth-child(2), #preview td:nth-child(2) { left: 84px; width: 66px; min-width: 66px; max-width: 66px; box-shadow: 2px 0 0 #8a8a8a; }
+    #preview td:nth-child(1), #preview td:nth-child(2) { background: #fff; z-index: 1; }
+    #preview tbody tr:nth-child(even) td:nth-child(1), #preview tbody tr:nth-child(even) td:nth-child(2) { background: #f1f1f1; }
+    #preview th:nth-child(1), #preview th:nth-child(2) { z-index: 3; }
+    /* label box */
+    #lblBox { display: block; margin-top: 8px; }
+    #lblBox textarea { width: 100%; box-sizing: border-box; min-height: 74px; padding: 6px; border: 1px solid #aaa; border-radius: 4px; font: 13px/1.35 inherit; font-family: inherit; resize: vertical; }
+    #lblBox .hint { font-size: 11px; color: #555; margin-top: 3px; }
+    #lblBox #lblMsg { font-size: 12px; margin-top: 3px; color: #1b5e20; white-space: pre-line; }
+    /* 3. data table: instant touch scroll + fixed (always visible) horizontal scroll bar */
+    .scroll { max-height: 70vh; max-height: calc(100dvh - 190px); overscroll-behavior: contain; touch-action: pan-x pan-y; }
+    .scroll::-webkit-scrollbar:horizontal { height: 0; }
+    #hbar { display: block; position: sticky; bottom: calc(50px + env(safe-area-inset-bottom)); z-index: 40; height: 4px; margin-top: 4px; overflow-x: scroll; overflow-y: hidden; background: #d0d0d0; border: 1px solid #999; -webkit-overflow-scrolling: touch; touch-action: pan-x; }
+    #hbar > div { height: 1px; }
+    #hbar::-webkit-scrollbar { height: 4px; -webkit-appearance: none; }
+    #hbar::-webkit-scrollbar-track { background: #d0d0d0; }
+    #hbar::-webkit-scrollbar-thumb { background: #1565c0; border-radius: 2px; min-width: 40px; }
+  }
+
+  .ib { min-width: 40px; height: 34px; padding: 0 10px; display: inline-flex; align-items: center; justify-content: center; color: #fff; }
+  .ib svg { width: 20px; height: 20px; fill: currentColor; pointer-events: none; }
+  #pause { background: #e65100; } #pause:hover:not(:disabled) { background: #bf360c; }
+  #stop { background: #c62828; } #stop:hover:not(:disabled) { background: #8e1b1b; }
+  #rev { background: #6a1b9a; } #rev:hover:not(:disabled) { background: #4a148c; }
+  #chart { touch-action: manipulation; }
+  #ptLbl { display: none; position: fixed; z-index: 120; background: #fff; border: 2px solid #1565c0; border-radius: 6px; padding: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); width: 280px; max-width: calc(100vw - 16px); }
+  #ptLbl.open { display: block; }
+  #ptLbl .cap { font-size: 12px; font-weight: 700; color: #0d2340; margin-bottom: 5px; }
+  #ptLbl input { width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid #aaa; border-radius: 4px; font-size: 14px; text-transform: uppercase; }
+  #ptLbl .bt { display: flex; gap: 6px; margin-top: 7px; }
+  #ptLbl .bt button { flex: 1; padding: 7px 4px; color: #fff; }
+  #ptOk { background: #1565c0; } #ptClr { background: #e65100; } #ptNo { background: #666; }
+  #ptDel { display: none; position: fixed; z-index: 120; background: #fff; border: 2px solid #c62828; border-radius: 6px; padding: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+  #ptDel.open { display: block; }
+  #ptDel .cap { font-size: 12px; font-weight: 700; color: #0d2340; margin-bottom: 6px; }
+  #ptDel .bt { display: flex; gap: 6px; }
+  #ptDel .bt button { flex: 1; padding: 8px 12px; color: #fff; }
+  #ptDelOk { background: #c62828; } #ptDelNo { background: #666; }
+  #pp { background: #1565c0; color: #fff; display: inline-flex; align-items: center; gap: 6px; } #pp:hover:not(:disabled) { background: #0d47a1; }
+  #pp svg { width: 16px; height: 16px; fill: #fff; flex: none; }
+  #lblBox { margin-top: 8px; }
+  #lblBox textarea { width: 100%; max-width: 640px; box-sizing: border-box; min-height: 74px; padding: 6px; border: 1px solid #aaa; border-radius: 4px; font-family: inherit; font-size: 13px; resize: vertical; display: block; }
+  #lblBox .hint { font-size: 11px; color: #555; margin-top: 3px; }
+  #lblBox #lblMsg { font-size: 12px; margin-top: 3px; color: #1b5e20; white-space: pre-line; }
+  #ppov { display: none; position: fixed; inset: 0; z-index: 100; background: #6f6f6f; overflow: auto; -webkit-overflow-scrolling: touch; }
+  #ppov.open { display: block; }
+  #ppbar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: #2f2f2f; color: #fff; }
+  #ppbar .ttl { flex: 1; font-weight: 700; font-size: 14px; letter-spacing: 1px; }
+  #ppbar button { padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px; }
+  #ppPrint { background: #1565c0; } #ppClose { background: #c62828; }
+  #ppbar svg { width: 16px; height: 16px; fill: #fff; }
+  #ppPage { background: #fff; color: #222; width: 1060px; max-width: calc(100% - 16px); margin: 12px auto 24px; padding: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.5); overflow-x: auto; }
+  #ppPage .tt { background: #1f3a5f; color: #fff; text-align: center; padding: 10px; font-weight: 700; font-size: 18px; }
+  #ppPage .tt small { display: block; font-weight: 400; font-size: 12px; margin-top: 3px; }
+  #ppPage .bd { background: #1f3a5f; color: #fff; text-align: center; padding: 6px; font-weight: 700; font-size: 13px; margin-top: 12px; }
+  #ppPage table { margin-top: 8px; font-size: 12px; }
+  #ppPage th, #ppPage td { border: 1px solid #becddc; padding: 3px 6px; }
+  #ppPage .lab td.l { background: #e5ecf5; color: #1f3a5f; font-weight: 700; font-size: 10.5px; }
+  #ppPage th { background: #1f3a5f; color: #fff; position: static; }
+  #ppPage tbody tr:nth-child(even) { background: #f3f7fb; }
+  #ppPage img { width: 100%; display: block; border: 1px solid #becddc; margin-top: 10px; }
+  @media print {
+    body.ppmode > *:not(#ppov) { display: none !important; }
+    body.ppmode { background: #fff; padding: 0 !important; }
+    body.ppmode #ppov { position: static; display: block; background: #fff; overflow: visible; }
+    body.ppmode #ppbar { display: none; }
+    body.ppmode #ppPage { box-shadow: none; margin: 0; padding: 0; width: 100%; max-width: 100%; }
+    body.ppmode #ppPage * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body.ppmode #ppPage tr { page-break-inside: avoid; } body.ppmode #ppPage thead { display: table-header-group; }
+  }
 </style>
 </head>
 <body>
@@ -112,26 +308,27 @@
       <div><label for="tno">TRAIN NO</label><input type="text" id="tno" class="info" style="width:130px"></div>
       <div><label for="lno">LOCO NO</label><input type="text" id="lno" class="info" style="width:130px"></div>
       <div><label for="lpn">LP NAME/HQ</label><input type="text" id="lpn" class="info" style="width:210px"></div>
-      <div><label for="dtx">DATA</label><input type="text" id="dtx" class="info" style="width:150px"></div>
+      <div><label for="dtx">DATE</label><input type="text" id="dtx" class="info" style="width:150px"></div>
       <div><label for="sec">SECTION</label><input type="text" id="sec" class="info" style="width:150px"></div>
     </div>
     <div class="row" style="margin-bottom:14px">
-      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 1"><input type="text" class="cvl" placeholder="Enter value"></div>
-      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 2"><input type="text" class="cvl" placeholder="Enter value"></div>
-      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 3"><input type="text" class="cvl" placeholder="Enter value"></div>
-      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 4"><input type="text" class="cvl" placeholder="Enter value"></div>
-      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 5"><input type="text" class="cvl" placeholder="Enter value"></div>
+      <div class="cust"><input type="text" class="chd" value="LOAD" placeholder="Custom heading 1"><input type="text" class="cvl"></div>
+      <div class="cust"><input type="text" class="chd" value="GROUP CLI" placeholder="Custom heading 2"><input type="text" class="cvl"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 3"><input type="text" class="cvl"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 4"><input type="text" class="cvl"></div>
+      <div class="cust"><input type="text" class="chd" placeholder="Custom heading 5"><input type="text" class="cvl"></div>
     </div>
     <div class="row">
-      <div><button id="dl" disabled>Download Excel</button></div>
-      <div><button id="pdf" disabled>Generate PDF</button></div>
       <div><label class="chk"><input type="checkbox" id="plot"> <span id="plotLbl">Plot Time vs Speed</span></label></div>
       <div><label class="chk"><input type="checkbox" id="sumChk"> Write Summary</label></div>
-      <div><label for="distIn" style="color:#c62828">ADD DISTANCE</label><input type="text" id="distIn" placeholder="D1-D2  (or D1-D2, D2-D3)" autocomplete="off" style="padding:6px;border:1px solid #aaa;border-radius:4px;width:230px"></div>
       <div><label for="ctitle">Chart Title</label><input type="text" id="ctitle" placeholder="Enter chart title" style="padding:6px;border:1px solid #aaa;border-radius:4px;width:280px"></div>
-      <div><label for="animSpd">Speed</label><select id="animSpd" style="padding:6px;border:0;height:28px"><option value="0.25">0.25X</option><option value="0.5">0.5X</option><option value="1" selected>1X</option><option value="2">2X</option><option value="4">4X</option><option value="8">8X</option><option value="12">12X</option><option value="16">16X</option></select></div>
-      <div><label for="animDur">Animation time</label><select id="animDur" style="padding:6px;border:0;height:28px"><option value="10">10 sec</option><option value="20" selected>20 sec</option><option value="40">40 sec</option><option value="60">60 sec</option></select></div>
-      <div><button id="anim" type="button">&#9654; Show Animation</button></div>
+      <div><label for="distIn" style="color:#c62828">ADD DISTANCE</label><input type="text" id="distIn" placeholder="D1-D2  (or D1-D2, D2-D3)" autocomplete="off" style="padding:6px;border:1px solid #aaa;border-radius:4px;width:230px"></div>
+    </div>
+    <div id="lblBox">
+      <label for="lblIn" style="color:#c62828">ADD LABELS BY TIME</label>
+      <textarea id="lblIn" placeholder="11:25:12 - D1 BSP STARTER&#10;12:12:20 - D2 TLD STARTER" autocomplete="off" autocapitalize="characters" spellcheck="false"></textarea>
+      <div class="hint">One per line (or separated by commas): time and label, e.g. 11:25:12 - D1 BSP STARTER. Each label is marked on the graph at that time.</div>
+      <div id="lblMsg"></div>
     </div>
     <div id="sumBox" class="hide">
       <div class="sumHead">SUMMARY OF SPM ANALYSIS</div>
@@ -139,7 +336,21 @@
       <div style="margin-top:8px"><button id="addRow" type="button">+ Add Row</button></div>
     </div>
     <div id="maxbox" class="hide"></div>
-    <div id="chartWrap" class="chartbox hide"><canvas id="chart"></canvas></div>
+    <div id="chartWrap" class="chartbox hide"><div id="chartInner"><canvas id="chart"></canvas></div></div>
+    <div class="row animctl" style="margin-top:10px;align-items:flex-end">
+      <div><label for="animSpd">Speed</label><select id="animSpd" style="padding:6px;border:0;height:28px"><option value="0.25">0.25X</option><option value="0.5">0.5X</option><option value="1" selected>1X</option><option value="2">2X</option><option value="4">4X</option><option value="8">8X</option><option value="12">12X</option><option value="16">16X</option></select></div>
+      <div><label for="animDur">Animation time</label><select id="animDur" style="padding:6px;border:0;height:28px"><option value="10">10 sec</option><option value="20" selected>20 sec</option><option value="40">40 sec</option><option value="60">60 sec</option></select></div>
+      <div id="pauseWrap" class="ibw"><button id="pause" type="button" class="ib" title="Pause" aria-label="Pause">&#10074;&#10074; Pause</button></div>
+      <div class="ibw"><button id="stop" type="button" class="ib" title="Stop" aria-label="Stop"></button></div>
+      <div class="ibw"><button id="rev" type="button" class="ib" title="Reverse" aria-label="Reverse"></button></div>
+      <div><button id="anim" type="button">&#9654; Show Animation</button></div>
+      <div style="margin-left:auto;display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap">
+      <div><button id="dl" disabled>Download Excel</button></div>
+      <div><button id="pdf" disabled><svg class="pdfic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="2" y="1" width="20" height="22" rx="3" fill="#fff"/><path d="M14 1v6a1 1 0 0 0 1 1h7" fill="#f3b5b5"/><text x="12" y="18" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" fill="#d32f2f">PDF</text></svg> Generate PDF</button></div>
+      <div><button id="pp" type="button" disabled title="Print preview"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8v5zm3-7a1 1 0 1 1 0-2 1 1 0 0 1 0 2zM18 3H6v4h12V3z"/></svg> Print Preview</button></div>
+      <div><label class="chk"><input type="checkbox" id="pdfData"> PDF WITH DATA</label></div>
+      </div>
+    </div>
     <div id="animBox" class="hide"></div>
   </div>
 
@@ -148,7 +359,25 @@
     <div class="scroll">
     <table id="preview"><thead><tr><th style="width:90px">DATE</th><th style="width:80px">TIME</th><th style="width:60px">SPEED</th><th id="thCode" style="width:120px">LAST/CUR LOCATION CODE</th><th id="thCode2" style="width:120px;display:none">LAST/CUR LOCATION CODE</th><th>LABEL (text typed here is marked on the graph)</th></tr></thead><tbody></tbody></table>
     </div>
+    <div id="hbar" aria-hidden="true"><div></div></div>
   </div>
+</div>
+<div id="ptLbl" role="dialog" aria-label="Add label">
+  <div class="cap" id="ptCap">Label</div>
+  <input type="text" id="ptIn" placeholder="e.g. D1 BSP STARTER" autocomplete="off" autocapitalize="characters">
+  <div class="bt"><button type="button" id="ptOk">Mark</button><button type="button" id="ptClr">Clear</button><button type="button" id="ptNo">Cancel</button></div>
+</div>
+<div id="ptDel" role="dialog" aria-label="Delete label">
+  <div class="cap" id="ptDelCap">Label</div>
+  <div class="bt"><button type="button" id="ptDelOk">Delete</button><button type="button" id="ptDelNo">Cancel</button></div>
+</div>
+<nav id="botnav" aria-label="Actions"></nav>
+<div id="ppov" role="dialog" aria-label="Print preview">
+  <div id="ppbar"><span class="ttl">PRINT PREVIEW</span>
+    <button id="ppPrint" type="button"><svg viewBox="0 0 24 24"><path d="M19 8H5a3 3 0 0 0-3 3v6h4v4h12v-4h4v-6a3 3 0 0 0-3-3zm-3 11H8v-5h8v5zM18 3H6v4h12V3z"/></svg> Print</button>
+    <button id="ppClose" type="button"><svg viewBox="0 0 24 24"><path d="M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/></svg> Close</button>
+  </div>
+  <div id="ppPage"></div>
 </div>
 
 <script>
@@ -195,6 +424,27 @@ function parseMedha(text) {
 
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(2, "0");
+
+// RTIS XLSX: same columns as the RTIS CSV. First sheet is converted to CSV text (in memory) and then
+// parsed by parseCSV, so both file types give identical results. Excel date serials are converted
+// without any timezone shift to "YYYY-MM-DD HH:mm:ss".
+function xlsxToCsvText(buf) {
+  if (typeof XLSX === "undefined") throw new Error("Excel reader library could not be loaded (check internet connection).");
+  const wb = XLSX.read(buf, { type: "array" });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const a = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: "" });
+  const iT = (a[0] || []).findIndex(h => String(h).toLowerCase().includes("logging"));
+  const cell = (v, ci) => {
+    if (ci === iT && typeof v === "number" && v > 20000 && v < 80000) {            // Excel date serial
+      const t = Math.round(v * 86400), days = Math.floor(t / 86400), sec = t - days * 86400;
+      const dd = new Date(Math.round((days - 25569) * 86400000));
+      return dd.getUTCFullYear() + "-" + pad(dd.getUTCMonth() + 1) + "-" + pad(dd.getUTCDate()) + " " +
+             pad(Math.floor(sec / 3600)) + ":" + pad(Math.floor(sec % 3600 / 60)) + ":" + pad(sec % 60);
+    }
+    return String(v).replace(/[,\r\n]/g, " ");
+  };
+  return a.map(r => r.map((v, ci) => cell(v, ci)).join(",")).join("\n");
+}
 
 // TELPRO XLSX: A = date (dd/mm/yyyy), B = time (hh:mm:ss), C = distance in metres per second, D = speed.
 // Header / summary rows are skipped. Distance column of the table = running total in km (same as Medha).
@@ -295,7 +545,10 @@ function parseCSV(text) {
   const iTime = header.findIndex(h => h.includes("logging"));
   let iSpeed = header.indexOf("speed");
   const iCode = header.findIndex(h => h.includes("stationcode") || h.includes("station"));
-  const iDist = header.findIndex(h => h.replace(/\s/g, "") === "distfromspeed"); // metres travelled in that second
+  // metres travelled in that second: accept "distFromSpeed", "Dist From Speed", "dist_from_speed", "distance", "dist (m)" ...
+  const hn = header.map(h => h.replace(/[^a-z0-9]/g, ""));
+  let iDist = hn.findIndex(h => h.includes("distfromspeed"));
+  if (iDist < 0) iDist = hn.findIndex(h => h.startsWith("dist"));
   if (iTime < 0 || iSpeed < 0 || iCode < 0) throw new Error("Expected columns not found (Logging Time, Speed, stationCode).");
   const out = [];
   for (let i = 1; i < lines.length; i++) {
@@ -347,6 +600,15 @@ function parseCSV(text) {
     }
     firstGroup = false;
     i = j;
+  }
+  // No distance column in the file: work it out from speed (km/h) and time gap, so the DISTANCE column always shows
+  if (iDist < 0 && out.length) {
+    let cum = 0;
+    out.forEach((r, k) => {
+      const gap = k ? Math.min(Math.max((r.ts - out[k - 1].ts) / 1000, 0), 60) : 1;
+      r.m = r.speed / 3.6 * (gap || 1);
+      cum += r.m; r.dist = +(cum / 1000).toFixed(3);
+    });
   }
   return out;
 }
@@ -444,14 +706,58 @@ function maxInfo() {
   return { i: m, row: rows[m] };
 }
 
+// ---- Label box: "11:25:12 - D1 BSP STARTER" lines are written into the matching rows (nearest time) ----
+const boxApplied = new Map();   // row object -> label text that the box set
+function parseLblBox(txt) {
+  const out = [];
+  String(txt || "").split(/[\n;,]+/).forEach(part => {
+    const m = part.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (!m) return;
+    const label = (part.slice(0, m.index) + " " + part.slice(m.index + m[0].length)).replace(/^[\s\-:\u2013]+|[\s\-:\u2013]+$/g, "").replace(/\s+/g, " ").trim().toUpperCase().replace(/^(D-?\d+)\s+\1\b/, "$1");
+    if (!label) return;
+    out.push({ sec: +m[1] * 3600 + +m[2] * 60 + (+m[3] || 0), hasSec: m[3] != null, label, shown: m[0] });
+  });
+  return out;
+}
+function applyLblBox() {
+  boxApplied.forEach((t, r) => { if (r.label === t) r.label = ""; });
+  boxApplied.clear();
+  const items = parseLblBox($("lblIn") ? $("lblIn").value : ""), msg = [];
+  if (items.length && rows.length) {
+    const secs = rows.map(r => { const t = r.time.split(":"); return +t[0] * 3600 + +t[1] * 60 + (+t[2] || 0); });
+    items.forEach(it => {
+      let best = -1, bd = 1e9;
+      for (let i = 0; i < rows.length; i++) { const d = Math.abs(secs[i] - it.sec); if (d < bd) { bd = d; best = i; if (d === 0) break; } }
+      if (best < 0) return;
+      const r = rows[best];
+      r.label = r.label && r.label.trim() && !boxApplied.has(r) ? r.label.trim() + " " + it.label : it.label;
+      boxApplied.set(r, r.label);
+      msg.push("\u2714 " + it.label + " @ " + r.time + (bd > 0 ? "  (nearest to " + it.shown + ")" : ""));
+    });
+  } else if (items.length) msg.push("Load a file first.");
+  if ($("lblMsg")) $("lblMsg").textContent = msg.join("\n");
+}
+let lblBoxTimer = null;
+$("lblIn").addEventListener("input", () => {
+  clearTimeout(lblBoxTimer);
+  lblBoxTimer = setTimeout(() => {
+    applyLblBox();
+    const inps = $("preview").querySelectorAll("input.lbl");
+    if (inps.length === rows.length) inps.forEach((el, i) => { el.value = rows[i].label; });   // refresh the table's label cells
+    drawChart();
+  }, 500);
+});
+
 function render() {
-  $("info").textContent = `File: ${fileName} | Total rows: ${allRows.length} | After filter: ${rows.length}`;
+  applyLblBox();
+  $("info").textContent = `File: ${fileName} | Total rows: ${allRows.length} | After filter: ${rows.length} \u2714`;
   $("dataHead").textContent = `Data (${rows.length} rows)`;
   const tb = $("preview").querySelector("tbody");
   tb.innerHTML = rows.map((r, i) =>
     `<tr><td>${r.date}</td><td>${r.time}</td><td>${r.speed}</td><td>${colVal(r)}</td>${showCode ? `<td>${r.code}</td>` : ""}<td><input class="lbl" data-i="${i}" value="${r.label.replace(/"/g, "&quot;")}"></td></tr>`).join("");
   $("dl").disabled = rows.length === 0;
   $("pdf").disabled = rows.length === 0;
+  $("pp").disabled = rows.length === 0;
   const mx = maxInfo(), box = $("maxbox");
   if (mx) {
     const rd = rangeDist();
@@ -507,6 +813,7 @@ const marksPlugin = {
       return false;
     };
     const placed = [];
+    c.$lh = [];   // clickable label boxes (for the delete popup)
     ctx.font = "bold 8.5px Arial";
     cr.forEach((o, k) => {
       const r = o.r;
@@ -515,7 +822,7 @@ const marksPlugin = {
       if (pl.t === "range") return;
       ctx.globalAlpha = (!A || k <= A.k) ? 1 : 0;
       const x = xs.getPixelForValue(k), y = ys.getPixelForValue(r.speed);
-      const txt = pl.t === "point" ? "D" + pl.n : r.label.trim(), w = ctx.measureText(txt).width + 4, h = 11;
+      const txt = (pl.t === "point" ? "D" + pl.n : r.label.trim()) + " " + r.speed + " KMPH", w = ctx.measureText(txt).width + 4, h = 11;
       ctx.strokeStyle = "#c62828"; ctx.fillStyle = "#c62828"; ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.beginPath(); ctx.moveTo(x, area.bottom); ctx.lineTo(x, y); ctx.stroke();
@@ -535,6 +842,7 @@ const marksPlugin = {
       }
       if (!best) best = [Math.min(Math.max(x + 8, area.left), area.right - w), Math.max(y - 22, area.top), 0, 0], best[2] = best[0] + w, best[3] = best[1] + h;
       placed.push(best);
+      c.$lh.push({ i: o.i, box: best, x, y, txt });
       // thin leader from point to label box
       const cx = Math.min(Math.max(x, best[0]), best[2]), cy = Math.min(Math.max(y, best[1]), best[3]);
       ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(cx, cy); ctx.stroke();
@@ -559,7 +867,7 @@ const marksPlugin = {
     });
     if (bi.legend.length) {
       const ly = y0 + bi.lanes * 26 + 4;
-      ctx.font = "9.5px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillStyle = "#c62828";
+      ctx.font = "9.5px Arial"; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillStyle = "#0d2a6b";
       bi.legend.forEach((row, r) => {
         let lx = area.left;
         row.forEach(t => { ctx.fillText(t, lx, ly + r * 15 + 7); lx += ctx.measureText(t).width + 26; });
@@ -770,12 +1078,38 @@ function animReadout(ki, pts, cum) {
   return { list, next, last, here };
 }
 let animRAF = 0;
+const mqM = window.matchMedia("(max-width: 900px)");   // icons / extra buttons are mobile only
+const IC = {
+  play:   '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+  pause:  '<svg viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>',
+  stop:   '<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>',
+  replay: '<svg viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/></svg>',
+  rev:    '<svg viewBox="0 0 24 24"><path d="M16 5v14L5 12z"/></svg>'
+};
+function setBtn(id, html, title) { const b = $(id); if (!b) return; b.innerHTML = html; b.title = title; b.setAttribute("aria-label", title); }
+let aiState = ["idle", false];
+function animIcons(st, paused) {
+  aiState = [st, paused];
+  if (mqM.matches) {
+    setBtn("anim", st === "done" ? IC.replay : IC.play, st === "done" ? "Replay" : "Start");
+    setBtn("pause", paused ? IC.play : IC.pause, paused ? "Resume" : "Pause");
+    setBtn("stop", IC.stop, "Stop");
+    setBtn("rev", IC.rev, "Reverse");
+  } else {
+    $("anim").innerHTML = st === "run" ? "&#9632; Stop" : st === "done" ? "&#8635; Replay" : "&#9654; Show Animation";
+    setBtn("pause", paused ? IC.play : IC.pause, paused ? "Resume" : "Pause");
+    setBtn("stop", IC.stop, "Stop");
+    setBtn("rev", IC.rev, "Reverse");
+  }
+}
+(mqM.addEventListener ? mqM.addEventListener("change", () => animIcons(...aiState)) : mqM.addListener(() => animIcons(...aiState)));
+animIcons("idle", false);
 function animStop() {
   if (animRAF) cancelAnimationFrame(animRAF);
   animRAF = 0;
   if (chart && chart.$anim) { chart.$anim = null; try { chart.draw(); } catch (e) {} }
   const b = $("animBox"); if (b) b.classList.add("hide");
-  const bt = $("anim"); if (bt) bt.innerHTML = "&#9654; Show Animation";
+  animIcons("idle", false);
 }
 function animPanel(a) {
   const cr = chartRows(), ki = Math.min(Math.floor(a.k), cr.length - 1), r = cr[ki].r;
@@ -788,31 +1122,62 @@ function animPanel(a) {
   else h += `<div class="chips">` + R.list.map(x => `<div class="chip ${x.passed ? "done" : (R.next && R.next.p === x.p ? "next" : "")}">D${x.p.n}${x.p.desc ? " " + x.p.desc : ""}: ${x.passed ? "passed &#10003; &nbsp;" + x.d.toFixed(3) + " km from it" : (R.next && R.next.p === x.p ? "next &#9654; " + x.d.toFixed(3) + " km to go" : "not reached")}</div>`).join("") + `</div>`;
   $("animBox").innerHTML = h;
 }
-$("anim").addEventListener("click", () => {
-  if (animRAF || (chart && chart.$anim && chart.$anim.k < chart.$anim.n - 1)) { animStop(); return; }
+function animStep(ts) {
+  if (!chart || !chart.$anim) return;
+  const a = chart.$anim;
+  if (a.paused || a.done) { animRAF = 0; return; }
+  if (!a.last) a.last = ts;
+  const dur = (+$("animDur").value || 20) / (+$("animSpd").value || 1);
+  a.k += a.dir * (ts - a.last) / 1000 * (a.n - 1) / dur;
+  a.last = ts;
+  if (a.k >= a.n - 1) { a.k = a.n - 1; if (a.dir > 0) a.done = true; }
+  if (a.k <= 0) { a.k = 0; if (a.dir < 0) a.done = true; }
+  chart.draw(); animPanel(a);
+  const cw = $("chartWrap");   // sideways-scrolling chart (mobile): keep the moving point in view
+  if (cw.scrollWidth > cw.clientWidth + 2) cw.scrollLeft = chart.scales.x.getPixelForValue(a.k) - cw.clientWidth * 0.6;
+  if (a.done) { animRAF = 0; animIcons("done", false); return; }
+  animRAF = requestAnimationFrame(animStep);
+}
+function animStart(dir) {
   if (!rows.length) { alert("Load a file first."); return; }
   if (!$("plot").checked) { $("plot").checked = true; }
   drawChart();
-  const cr = chartRows(), n = cr.length;
+  const n = chartRows().length;
   if (n < 2) return;
-  chart.$anim = { k: 0, n, pts: chartPoints(), cum: chartCum(), last: 0 };
+  chart.$anim = { k: dir > 0 ? 0 : n - 1, n, pts: chartPoints(), cum: chartCum(), last: 0, dir, paused: false, done: false };
   $("animBox").classList.remove("hide");
-  $("anim").innerHTML = "&#9632; Stop";
-  const step = ts => {
-    if (!chart || !chart.$anim) return;
-    const a = chart.$anim;
-    if (!a.last) a.last = ts;
-    const dur = (+$("animDur").value || 20) / (+$("animSpd").value || 1);
-    a.k = Math.min(a.n - 1, a.k + (ts - a.last) / 1000 * (a.n - 1) / dur);
-    a.last = ts;
-    chart.draw(); animPanel(a);
-    if (a.k >= a.n - 1) { animRAF = 0; $("anim").innerHTML = "&#8635; Replay"; return; }
-    animRAF = requestAnimationFrame(step);
-  };
-  animRAF = requestAnimationFrame(step);
+  animIcons("run", false);
+  animRAF = requestAnimationFrame(animStep);
+}
+$("anim").addEventListener("click", () => {
+  const a = chart && chart.$anim;
+  if (!mqM.matches && (animRAF || (a && !a.done))) { animStop(); return; }   // desktop: button toggles start/stop as before
+  animStart(1);                                                                 // mobile: Start / Replay
+});
+$("stop").addEventListener("click", animStop);
+$("pause").addEventListener("click", () => {
+  const a = chart && chart.$anim;
+  if (!a || a.done) return;
+  if (!a.paused) {
+    a.paused = true;
+    if (animRAF) cancelAnimationFrame(animRAF);
+    animRAF = 0;
+    animIcons("run", true);
+  } else {
+    a.paused = false; a.last = 0;
+    animIcons("run", false);
+    animRAF = requestAnimationFrame(animStep);
+  }
+});
+$("rev").addEventListener("click", () => {
+  const a = chart && chart.$anim;
+  if (!a) { animStart(-1); return; }
+  a.dir = -a.dir; a.paused = false; a.done = false; a.last = 0;
+  animIcons("run", false);
+  if (!animRAF) animRAF = requestAnimationFrame(animStep);
 });
 
-const TYPE_ACCEPT = { "MEDHA MEMU": ".txt,text/plain", "MEDHA 3PH": ".txt,text/plain", RTIS: ".csv,text/csv", TELPRO: ".xlsx,.xls", MRT: ".csv,text/csv" };
+const TYPE_ACCEPT = { "MEDHA MEMU": ".txt,text/plain", "MEDHA 3PH": ".txt,text/plain", RTIS: ".csv,.xlsx,.xls,text/csv", TELPRO: ".xlsx,.xls", MRT: ".csv,text/csv" };
 $("ftype").addEventListener("change", () => {
   const t = $("ftype").value, f = $("file");
   f.value = "";
@@ -829,10 +1194,13 @@ $("file").addEventListener("change", e => {
     e.target.value = "";
     return;
   }
+  const isExcel = t === "RTIS" && /\.xlsx?$/i.test(f.name);
   const rd = new FileReader();
-  rd.onload = () => {
+  $("info").innerHTML = '<span class="spin"></span>Loading data...';
+  rd.onerror = () => { $("info").textContent = ""; alert("Could not read the file."); };
+  rd.onload = () => { setTimeout(() => {
     try {
-      const data = t === "TELPRO" ? parseTelpro(rd.result) : t === "MRT" ? parseMRT(rd.result) : t === "MEDHA 3PH" ? parseMedha3P(rd.result) : t === "MEDHA MEMU" ? parseMedha(rd.result) : parseCSV(rd.result);
+      const data = t === "TELPRO" ? parseTelpro(rd.result) : t === "MRT" ? parseMRT(rd.result) : t === "MEDHA 3PH" ? parseMedha3P(rd.result) : t === "MEDHA MEMU" ? parseMedha(rd.result) : parseCSV(isExcel ? xlsxToCsvText(rd.result) : rd.result);
       if (!data.length) throw new Error("No valid rows found.");
       allRows = data;
       fileName = f.name.replace(/\.(csv|txt|xlsx|xls)$/i, "");
@@ -843,10 +1211,11 @@ $("file").addEventListener("change", e => {
       $("reset").disabled = false;
       applyFilter();
     } catch (err) {
+      $("info").textContent = "";
       alert(err.message);
     }
-  };
-  if (t === "TELPRO") rd.readAsArrayBuffer(f); else rd.readAsText(f);
+  }, 50); };
+  if (t === "TELPRO" || isExcel) rd.readAsArrayBuffer(f); else rd.readAsText(f);
 });
 
 $("apply").addEventListener("click", applyFilter);
@@ -863,7 +1232,7 @@ function getInfo() {
     ["TRAIN NO", $("tno").value.trim()],
     ["LOCO NO", $("lno").value.trim()],
     ["LP NAME/HQ", $("lpn").value.trim()],
-    ["DATA", $("dtx").value.trim()],
+    ["DATE", $("dtx").value.trim()],
     ["SECTION", $("sec").value.trim()]
   ];
   document.querySelectorAll(".cust").forEach(d => {
@@ -951,9 +1320,10 @@ $("dl").addEventListener("click", async () => {
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 });
 
+const PDF_ICON = '<svg class="pdfic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="2" y="1" width="20" height="22" rx="3" fill="#fff"/><path d="M14 1v6a1 1 0 0 0 1 1h7" fill="#f3b5b5"/><text x="12" y="18" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="8.5" fill="#d32f2f">PDF</text></svg>';
 $("pdf").addEventListener("click", () => {
   const btn = $("pdf");
-  btn.disabled = true; btn.textContent = "Generating PDF...";
+  btn.disabled = true; btn.innerHTML = PDF_ICON + " Generating PDF...";
   setTimeout(() => {
     try {
       const doc = new jspdf.jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
@@ -1034,6 +1404,7 @@ $("pdf").addEventListener("click", () => {
       }
 
       // ---- data table (continues on the summary page when there is room) ----
+      if ($("pdfData").checked) {
       if (nextY === null || nextY > PH - 40) { doc.addPage(); nextY = 8; }
       band(nextY, 7, "DATA TABLE  (" + rows.length + " rows)", 10);
       doc.autoTable({
@@ -1045,6 +1416,7 @@ $("pdf").addEventListener("click", () => {
         alternateRowStyles: { fillColor: ZEBRA },
         margin: { left: M, right: M, top: 12, bottom: 12 }
       });
+      }
 
       // ---- footer on every page ----
       const n = doc.getNumberOfPages(), stamp = new Date().toLocaleString("en-GB");
@@ -1055,11 +1427,177 @@ $("pdf").addEventListener("click", () => {
         doc.text("Raipur Division  |  Generated " + stamp, M, PH - 5);
         doc.text("Page " + i + " of " + n, PW - M, PH - 5, { align: "right" });
       }
-      doc.save(fileName + ".pdf");
+      const clean = v => String(v || "").trim().replace(/[\\\/:*?"<>|]+/g, "-").replace(/\s+/g, "_");
+      const dtp = rows[0].date.replace(/\//g, "-");
+      const nm = [clean($("lpn").value), clean($("tno").value), dtp].filter(Boolean).join("_");
+      doc.save((nm || fileName) + ".pdf");
     } catch (err) { alert("PDF error: " + err.message); }
-    btn.disabled = false; btn.textContent = "Generate PDF";
+    btn.disabled = false; btn.innerHTML = PDF_ICON + " Generate PDF";
   }, 50);
 });
+
+// ---- Double-click (desktop) / double-tap (mobile) on the chart: type a label for that point ----
+(function () {
+  const cv = $("chart"), box = $("ptLbl"), inp = $("ptIn");
+  let cur = -1;
+  function hide() { box.classList.remove("open"); cur = -1; }
+  function pick(cx, cy) {
+    if (!chart) return;
+    const rect = cv.getBoundingClientRect();
+    const ev = { x: cx - rect.left, y: cy - rect.top, native: null };
+    const els = chart.getElementsAtEventForMode(ev, "nearest", { intersect: false, axis: "x" }, false);
+    if (!els.length) return;
+    const cr = chartRows(), o = cr[els[0].index];
+    if (!o) return;
+    cur = o.i;
+    $("ptCap").textContent = "Label at " + o.r.time + "  (speed " + o.r.speed + ")";
+    inp.value = o.r.label || "";
+    box.classList.add("open");
+    const w = box.offsetWidth, h = box.offsetHeight;
+    box.style.left = Math.max(8, Math.min(cx - w / 2, window.innerWidth - w - 8)) + "px";
+    box.style.top = Math.max(8, Math.min(cy + 14, window.innerHeight - h - 8)) + "px";
+    setTimeout(() => { inp.focus(); inp.select(); }, 30);
+  }
+  function save(text) {
+    if (cur < 0) return hide();
+    const r = rows[cur]; r.label = text.trim().toUpperCase();
+    boxApplied.delete(r);
+    const el = $("preview").querySelector('input.lbl[data-i="' + cur + '"]');
+    if (el) el.value = r.label;
+    hide(); drawChart();
+  }
+  cv.addEventListener("dblclick", e => { e.preventDefault(); pick(e.clientX, e.clientY); });
+  let lt = 0, lx = 0, ly = 0;
+  cv.addEventListener("pointerup", e => {            // touch: two quick taps close together = double-tap
+    if (e.pointerType === "mouse") return;
+    const now = Date.now();
+    if (now - lt < 350 && Math.hypot(e.clientX - lx, e.clientY - ly) < 30) { lt = 0; pick(e.clientX, e.clientY); }
+    else { lt = now; lx = e.clientX; ly = e.clientY; }
+  });
+  $("ptOk").addEventListener("click", () => save(inp.value));
+  $("ptClr").addEventListener("click", () => save(""));
+  $("ptNo").addEventListener("click", hide);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter") save(inp.value); else if (e.key === "Escape") hide(); });
+})();
+
+// ---- Click / tap on a label on the chart: offer to delete it ----
+(function () {
+  const cv = $("chart"), box = $("ptDel");
+  let cur = -1, pend = null, lastClick = 0;
+  function hide() { box.classList.remove("open"); cur = -1; }
+  function find(cx, cy) {
+    if (!chart || !chart.$lh) return null;
+    const rect = cv.getBoundingClientRect(), x = cx - rect.left, y = cy - rect.top, pad = 5;
+    for (let n = chart.$lh.length - 1; n >= 0; n--) {
+      const h = chart.$lh[n], b = h.box;
+      if ((x >= b[0] - pad && x <= b[2] + pad && y >= b[1] - pad && y <= b[3] + pad) || Math.hypot(x - h.x, y - h.y) <= 7) return h;
+    }
+    return null;
+  }
+  function show(h, cx, cy) {
+    cur = h.i;
+    $("ptDelCap").textContent = "Label: " + h.txt;
+    box.classList.add("open");
+    const w = box.offsetWidth, ht = box.offsetHeight;
+    box.style.left = Math.max(8, Math.min(cx - w / 2, window.innerWidth - w - 8)) + "px";
+    box.style.top = Math.max(8, Math.min(cy + 14, window.innerHeight - ht - 8)) + "px";
+  }
+  cv.addEventListener("click", e => {
+    const now = Date.now(), dbl = now - lastClick < 400; lastClick = now;
+    clearTimeout(pend);
+    if (dbl) { hide(); return; }                        // double-click / double-tap belongs to the label editor
+    const cx = e.clientX, cy = e.clientY, h = find(cx, cy);
+    if (!h) { hide(); return; }
+    pend = setTimeout(() => { if (!$("ptLbl").classList.contains("open")) show(h, cx, cy); }, 300);
+  });
+  $("ptDelOk").addEventListener("click", () => {
+    if (cur < 0) return hide();
+    const r = rows[cur]; r.label = ""; boxApplied.delete(r);
+    const el = $("preview").querySelector('input.lbl[data-i="' + cur + '"]'); if (el) el.value = "";
+    hide(); drawChart();
+  });
+  $("ptDelNo").addEventListener("click", hide);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") hide(); });
+})();
+
+// ---- Mobile: print preview (with Close and Print buttons) ----
+(function () {
+  const esc = v => String(v == null ? "" : v).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const ov = $("ppov"), pg = $("ppPage");
+  function build() {
+    const info = getInfo(), per = 5;
+    let h = '<div class="tt">SPM / RTIS DATA CHART AND GRAPHICAL VIEW<small>Raipur Division</small></div><table class="lab"><tbody>';
+    for (let i = 0; i < info.length; i += per) {
+      const part = info.slice(i, i + per);
+      while (part.length < per) part.push(["", ""]);
+      h += "<tr>" + part.map(x => '<td class="l">' + esc(x[0]) + "</td>").join("") + "</tr>";
+      h += "<tr>" + part.map(x => "<td>" + esc(x[1]) + "</td>").join("") + "</tr>";
+    }
+    h += "</tbody></table>";
+    const first = rows[0], last = rows[rows.length - 1], mx = maxInfo(), rd = rangeDist();
+    h += "<table><thead><tr><th>FILE</th><th>FROM</th><th>TO</th><th>ROWS</th><th>MAX SPEED</th><th>" + (mode === "medha" ? "DISTANCE (FROM - TO)" : "MAX SPEED LOCATION") + "</th></tr></thead><tbody><tr>" +
+      [fileName, first.date + " " + first.time, last.date + " " + last.time, rows.length, mx.row.speed + " km/h  (" + mx.row.time + ")", mode === "medha" ? rd.split(": ")[1] : (mx.row.code || "-")].map(v => "<td>" + esc(v) + "</td>").join("") + "</tr></tbody></table>";
+    h += '<img alt="Chart" src="' + chartPNG() + '">';
+    const sm = getSummary();
+    if (sm.length) h += '<div class="bd">SUMMARY OF SPM ANALYSIS</div><table><thead><tr><th style="width:50px">NO.</th><th>OBSERVATION</th></tr></thead><tbody>' +
+      sm.map((t, i) => "<tr><td><b>" + (i + 1) + '</b></td><td style="text-align:left;white-space:pre-wrap">' + esc(t) + "</td></tr>").join("") + "</tbody></table>";
+    if ($("pdfData").checked) h += '<div class="bd">DATA TABLE  (' + rows.length + " rows)</div><table><thead><tr>" +
+      (showCode ? ["DATE", "TIME", "SPEED", colName(), "CODE", "LABEL"] : ["DATE", "TIME", "SPEED", colName(), "LABEL"]).map(x => "<th>" + x + "</th>").join("") + "</tr></thead><tbody>" +
+      rows.map(r => "<tr><td>" + r.date + "</td><td>" + r.time + "</td><td>" + r.speed + "</td><td>" + esc(colVal(r)) + "</td>" + (showCode ? "<td>" + esc(r.code) + "</td>" : "") + "<td>" + esc(r.label) + "</td></tr>").join("") + "</tbody></table>";
+    return h;
+  }
+  let pst = null;
+  function open() {
+    if (!rows.length) return;
+    const b = $("pp"); b.disabled = true;
+    setTimeout(() => {
+      try {
+        pg.innerHTML = build(); ov.classList.add("open"); ov.scrollTop = 0;
+        document.body.style.overflow = "hidden"; document.body.classList.add("ppmode");
+        pst = document.createElement("style"); pst.textContent = "@page { size: A4 landscape; margin: 8mm; }"; document.head.appendChild(pst);
+      } catch (err) { alert("Print preview error: " + err.message); }
+      b.disabled = rows.length === 0;
+    }, 30);
+  }
+  function close() {
+    ov.classList.remove("open"); pg.innerHTML = ""; document.body.style.overflow = ""; document.body.classList.remove("ppmode");
+    if (pst) { pst.remove(); pst = null; }
+  }
+  $("pp").addEventListener("click", open);
+  $("ppClose").addEventListener("click", close);
+  $("ppPrint").addEventListener("click", () => window.print());
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && ov.classList.contains("open")) close(); });
+})();
+
+// ---- Mobile: move action buttons into the fixed bottom nav bar (and back on desktop) ----
+(function () {
+  const nav = $("botnav"), mq = window.matchMedia("(max-width: 900px)");
+  const items = ["anim", "dl", "pdf", "pp", "pdfData"].map(id => {
+    const el = $(id), w = el.closest(".animctl > div > div, .animctl > div");
+    const wrap = id === "pdfData" ? el.closest("div") : el.closest("div");
+    const ph = document.createComment(id);
+    wrap.parentNode.insertBefore(ph, wrap);
+    return { wrap, ph };
+  });
+  const holder = $("anim").closest(".animctl").lastElementChild; // margin-left:auto container
+  const apply = () => {
+    if (mq.matches) { items.forEach(i => nav.appendChild(i.wrap)); holder.classList.add("moved-empty"); }
+    else { items.forEach(i => i.ph.parentNode.insertBefore(i.wrap, i.ph.nextSibling)); holder.classList.remove("moved-empty"); }
+  };
+  (mq.addEventListener ? mq.addEventListener("change", apply) : mq.addListener(apply));
+  apply();
+})();
+
+// ---- Mobile: fixed horizontal scroll bar for the data table (synced with the table) ----
+(function () {
+  const sc = document.querySelector(".scroll"), hb = $("hbar"), sp = hb.firstElementChild;
+  const size = () => { sp.style.width = sc.scrollWidth + "px"; if (hb.scrollLeft !== sc.scrollLeft) hb.scrollLeft = sc.scrollLeft; };
+  sc.addEventListener("scroll", () => { if (hb.scrollLeft !== sc.scrollLeft) hb.scrollLeft = sc.scrollLeft; }, { passive: true });
+  hb.addEventListener("scroll", () => { if (sc.scrollLeft !== hb.scrollLeft) sc.scrollLeft = hb.scrollLeft; }, { passive: true });
+  if (window.ResizeObserver) { const ro = new ResizeObserver(size); ro.observe(sc); ro.observe($("preview")); }
+  window.addEventListener("resize", size);
+  size();
+})();
 </script>
 </body>
 </html>
